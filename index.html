@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水电费快捷计算</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 16px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Container 相对定位，用于放置 GitHub 图标 */
+        .container {
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            padding: 28px 32px 20px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* GitHub 图标 */
+        .github-link {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #f5f5f5;
+            transition: all 0.25s ease;
+            z-index: 10;
+        }
+        .github-link:hover {
+            background: #24292f;
+        }
+        .github-link svg {
+            width: 20px;
+            height: 20px;
+            fill: #555;
+            transition: fill 0.25s ease;
+        }
+        .github-link:hover svg {
+            fill: #ffffff;
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-top: 6px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            padding: 16px 32px 0;
+            gap: 6px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: #888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+        .tab:hover { background: #efefef; }
+        .tab.active {
+            background: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+        }
+        .tab.active[data-tab="electricity"] { color: #d97706; }
+        .tab.active[data-tab="water"] { color: #0891b2; }
+        .tab-icon { font-size: 18px; }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 24px 32px 32px;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Rows */
+        .form-row { margin-bottom: 18px; }
+        .form-row.with-date {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .date-group { flex-shrink: 0; width: 155px; }
+        .reading-group { flex: 1; }
+
+        .field-label {
+            display: block;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #1a1a1a;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .field-input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+        .field-input:read-only {
+            background: #f8f8f8;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .field-input:read-only:focus {
+            border-color: #e5e5e5;
+            box-shadow: none;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #1a1a1a;
+            background: #ffffff;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .date-input:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        .unit {
+            position: absolute;
+            right: 14px;
+            font-size: 14px;
+            color: #aaa;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .input-wrap.has-unit .field-input { padding-right: 56px; }
+
+        .auto-badge {
+            display: inline-block;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #e0f2fe;
+            color: #0284c7;
+            margin-left: 6px;
+            font-weight: 500;
+            vertical-align: middle;
+        }
+        .auto-badge.manual {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        /* Result Card */
+        .result-card {
+            margin-top: 24px;
+            padding: 24px;
+            border-radius: 14px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        #electricity .result-card {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 1px solid #fed7aa;
+        }
+        #water .result-card {
+            background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
+            border: 1px solid #a5f3fc;
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .result-value {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            transition: color 0.2s ease;
+        }
+        #electricity .result-value { color: #c2410c; }
+        #water .result-value { color: #0e7490; }
+        .result-value.empty { color: #ccc; }
+        .result-formula {
+            font-size: 13px;
+            color: #999;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        /* Actions */
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-reset {
+            padding: 8px 20px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-reset:hover {
+            border-color: #ccc;
+            color: #333;
+            background: #f8f8f8;
+        }
+        .btn-clear {
+            padding: 8px 16px;
+            border: 1.5px solid #fca5a5;
+            border-radius: 8px;
+            background: #fef2f2;
+            color: #dc2626;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-clear:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #b91c1c;
+        }
+        .save-indicator {
+            font-size: 12px;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .save-indicator.show { opacity: 1; }
+
+        /* Save Status Bar */
+        .save-status-bar {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+        }
+        .save-status-bar .save-label {
+            color: #64748b;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .save-status-bar .save-time {
+            color: #1e293b;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+        .save-status-bar .save-time.never {
+            color: #94a3b8;
+            font-weight: 400;
+        }
+        .save-status-bar .save-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+        .save-status-bar .save-dot.saved {
+            background: #22c55e;
+        }
+
+        /* Save Button */
+        .btn-save {
+            padding: 8px 20px;
+            border: 1.5px solid #3b82f6;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            font-weight: 500;
+        }
+        .btn-save:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+        .btn-save:active {
+            transform: scale(0.96);
+        }
+
+        .restore-toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: rgba(26, 26, 26, 0.92);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .restore-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Hide number spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] { -moz-appearance: textfield; }
+
+        /* Responsive */
+        @media (max-width: 520px) {
+            .form-row.with-date { flex-direction: column; gap: 12px; }
+            .date-group { width: 100%; }
+            .tab-content { padding: 20px 20px 28px; }
+            .header { padding: 24px 20px 16px; }
+            .tabs { padding: 12px 20px 0; }
+            .result-value { font-size: 30px; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .actions-btns { justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- GitHub 链接 -->
+        <a href="https://github.com/JACK-ZHANG-coming/utility-bills-ai" target="_blank" rel="noopener noreferrer" class="github-link" title="GitHub 项目">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+        </a>
+
+        <div class="header">
+            <h1>水电费快捷计算</h1>
+            <div class="subtitle">输入抄表数据，自动计算费用</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="electricity" onclick="switchTab('electricity')">
+                <span class="tab-icon">⚡</span>
+                <span>电费计算</span>
+            </button>
+            <button class="tab" data-tab="water" onclick="switchTab('water')">
+                <span class="tab-icon">💧</span>
+                <span>水费计算</span>
+            </button>
+        </div>
+
+        <!-- ==================== 电费计算 ==================== -->
+        <div class="tab-content active" id="electricity">
+            <!-- 输入框1：上期电表度数（左侧带日期） -->
+            <div class="form-row with-date">
+                <div class="date-group">
+                    <label class="field-label">抄表日期</label>
+                    <input type="date" class="date-input" id="elec-date1">
+                </div>
+                <div class="reading-group">
+                    <label class="field-label">上期电表度数</label>
+                    <div class="input-wrap has-unit">
+                        <input type="number" step="any" class="field-input" id="elec-input1" placeholder="0">
+                        <span class="unit">度</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入框2：本期电表度数（左侧带日期，默认今天） -->
+            <div class="form-row with-date">
+                <div class="date-group">
+                    <label class="field-label">抄表日期</label>
+                    <input type="date" class="date-input" id="elec-date2">
+                </div>
+                <div class="reading-group">
+                    <label class="field-label">本期电表度数</label>
+                    <div class="input-wrap has-unit">
+                        <input type="number" step="any" class="field-input" id="elec-input2" placeholder="0">
+                        <span class="unit">度</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入框3：用电量（自动计算或手动输入） -->
+            <div class="form-row">
+                <label class="field-label">
+                    用电量
+                    <span class="auto-badge manual" id="elec-badge3">手动输入</span>
+                </label>
+                <div class="input-wrap has-unit">
+                    <input type="number" step="any" class="field-input" id="elec-input3" placeholder="0">
+                    <span class="unit">度</span>
+                </div>
+            </div>
+
+            <!-- 输入框4：单价 -->
+            <div class="form-row">
+                <label class="field-label">单价</label>
+                <div class="input-wrap has-unit">
+                    <input type="number" step="any" class="field-input" id="elec-input4" value="0.55">
+                    <span class="unit">元/度</span>
+                </div>
+            </div>
+
+            <!-- 结果行 -->
+            <div class="result-card">
+                <div class="result-label">应缴电费</div>
+                <div class="result-value empty" id="elec-result">¥ 0</div>
+                <div class="result-formula" id="elec-formula"></div>
+            </div>
+
+            <!-- 上次保存时间状态 -->
+            <div class="save-status-bar" id="elec-save-status">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="save-dot" id="elec-save-dot"></span>
+                    <span class="save-label">上次保存时间</span>
+                </div>
+                <span class="save-time never" id="elec-save-time">尚未保存</span>
+            </div>
+
+            <div class="actions">
+                <span class="save-indicator" id="elec-save-indicator">✓ 已保存</span>
+                <div class="actions-btns">
+                    <button class="btn-save" onclick="manualSave('elec')">保存数据</button>
+                    <button class="btn-clear" onclick="clearAllSavedData()">清除已保存数据</button>
+                    <button class="btn-reset" onclick="resetForm('elec')">重置</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 水费计算 ==================== -->
+        <div class="tab-content" id="water">
+            <!-- 输入框1：上期水表度数（左侧带日期） -->
+            <div class="form-row with-date">
+                <div class="date-group">
+                    <label class="field-label">抄表日期</label>
+                    <input type="date" class="date-input" id="water-date1">
+                </div>
+                <div class="reading-group">
+                    <label class="field-label">上期水表度数</label>
+                    <div class="input-wrap has-unit">
+                        <input type="number" step="any" class="field-input" id="water-input1" placeholder="0">
+                        <span class="unit">吨</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入框2：本期水表度数（左侧带日期，默认今天） -->
+            <div class="form-row with-date">
+                <div class="date-group">
+                    <label class="field-label">抄表日期</label>
+                    <input type="date" class="date-input" id="water-date2">
+                </div>
+                <div class="reading-group">
+                    <label class="field-label">本期水表度数</label>
+                    <div class="input-wrap has-unit">
+                        <input type="number" step="any" class="field-input" id="water-input2" placeholder="0">
+                        <span class="unit">吨</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 输入框3：用水量（自动计算或手动输入） -->
+            <div class="form-row">
+                <label class="field-label">
+                    用水量
+                    <span class="auto-badge manual" id="water-badge3">手动输入</span>
+                </label>
+                <div class="input-wrap has-unit">
+                    <input type="number" step="any" class="field-input" id="water-input3" placeholder="0">
+                    <span class="unit">吨</span>
+                </div>
+            </div>
+
+            <!-- 输入框4：单价 -->
+            <div class="form-row">
+                <label class="field-label">单价</label>
+                <div class="input-wrap has-unit">
+                    <input type="number" step="any" class="field-input" id="water-input4" value="2.8">
+                    <span class="unit">元/吨</span>
+                </div>
+            </div>
+
+            <!-- 结果行 -->
+            <div class="result-card">
+                <div class="result-label">应缴水费</div>
+                <div class="result-value empty" id="water-result">¥ 0</div>
+                <div class="result-formula" id="water-formula"></div>
+            </div>
+
+            <!-- 上次保存时间状态 -->
+            <div class="save-status-bar" id="water-save-status">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="save-dot" id="water-save-dot"></span>
+                    <span class="save-label">上次保存时间</span>
+                </div>
+                <span class="save-time never" id="water-save-time">尚未保存</span>
+            </div>
+
+            <div class="actions">
+                <span class="save-indicator" id="water-save-indicator">✓ 已保存</span>
+                <div class="actions-btns">
+                    <button class="btn-save" onclick="manualSave('water')">保存数据</button>
+                    <button class="btn-clear" onclick="clearAllSavedData()">清除已保存数据</button>
+                    <button class="btn-reset" onclick="resetForm('water')">重置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取今天的日期（YYYY-MM-DD 格式）
+        function getToday() {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            const d = String(today.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // 切换 Tab
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // 格式化数字：去除浮点误差，保留完整小数位
+        function formatNumber(num) {
+            if (num === 0) return '0';
+            return parseFloat(num.toPrecision(12)).toString();
+        }
+
+        // 输入框3 的自动计算逻辑
+        // 规则：当输入框1或2有值时 → 只读 + 自动计算（输入框2 - 输入框1）
+        //       当输入框1和2均无值时 → 允许手动输入
+        function updateCalc(prefix) {
+            const input1 = document.getElementById(`${prefix}-input1`);
+            const input2 = document.getElementById(`${prefix}-input2`);
+            const input3 = document.getElementById(`${prefix}-input3`);
+            const badge  = document.getElementById(`${prefix}-badge3`);
+
+            const val1 = input1.value.trim();
+            const val2 = input2.value.trim();
+
+            if (val1 !== '' || val2 !== '') {
+                // 至少一个有值 → 输入框3 只读，自动计算
+                input3.readOnly = true;
+                badge.textContent = '自动计算';
+                badge.classList.remove('manual');
+
+                if (val1 !== '' && val2 !== '') {
+                    // 两个都有值 → 差值
+                    const diff = parseFloat(val2) - parseFloat(val1);
+                    input3.value = formatNumber(diff);
+                } else {
+                    // 只有一个有值 → 清空（等待两个都填入后计算）
+                    input3.value = '';
+                }
+            } else {
+                // 两个都无值 → 允许手动输入
+                input3.readOnly = false;
+                badge.textContent = '手动输入';
+                badge.classList.add('manual');
+            }
+
+            updateResult(prefix);
+        }
+
+        // 更新结果行
+        // 规则：结果 = 输入框3 × 输入框4，保留完整小数位
+        function updateResult(prefix) {
+            const input3 = document.getElementById(`${prefix}-input3`);
+            const input4 = document.getElementById(`${prefix}-input4`);
+            const result = document.getElementById(`${prefix}-result`);
+            const formula = document.getElementById(`${prefix}-formula`);
+
+            const val3 = parseFloat(input3.value);
+            const val4 = parseFloat(input4.value);
+
+            if (isNaN(val3) || isNaN(val4)) {
+                result.textContent = '¥ 0';
+                result.classList.add('empty');
+                formula.textContent = '';
+                return;
+            }
+
+            const total = val3 * val4;
+            result.textContent = `¥ ${formatNumber(total)}`;
+            result.classList.remove('empty');
+            formula.textContent = `${formatNumber(val3)} × ${formatNumber(val4)} = ${formatNumber(total)}`;
+        }
+
+        // ==================== localStorage 本地存储 ====================
+        // 按页面分别管理存储键值，互不干扰
+        const STORAGE_KEYS = {
+            elec: 'utility-bills-electricity',
+            water: 'utility-bills-water'
+        };
+
+        // 保存数据到 localStorage（JSON 格式）
+        function saveToStorage(prefix) {
+            try {
+                const data = {
+                    date1:  document.getElementById(`${prefix}-date1`).value,
+                    date2:  document.getElementById(`${prefix}-date2`).value,
+                    input1: document.getElementById(`${prefix}-input1`).value,
+                    input2: document.getElementById(`${prefix}-input2`).value,
+                    input3: document.getElementById(`${prefix}-input3`).value,
+                    input4: document.getElementById(`${prefix}-input4`).value,
+                    savedAt: new Date().toISOString()
+                };
+                localStorage.setItem(STORAGE_KEYS[prefix], JSON.stringify(data));
+                showSaveIndicator(prefix);
+            } catch (e) {
+                console.error('保存数据失败:', e);
+            }
+        }
+
+        // 显示"已保存"提示（2秒后淡出）
+        function showSaveIndicator(prefix) {
+            const indicator = document.getElementById(`${prefix}-save-indicator`);
+            if (!indicator) return;
+            indicator.classList.add('show');
+            clearTimeout(indicator._timer);
+            indicator._timer = setTimeout(() => indicator.classList.remove('show'), 2000);
+        }
+
+        // 格式化时间戳为 YYYY-MM-DD HH:mm:ss
+        function formatTimestamp(isoString) {
+            const d = new Date(isoString);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const s = String(d.getSeconds()).padStart(2, '0');
+            return `${y}-${m}-${day} ${h}:${min}:${s}`;
+        }
+
+        // 更新"上次保存时间"显示
+        function updateSaveTimeDisplay(prefix) {
+            const timeEl = document.getElementById(`${prefix}-save-time`);
+            const dotEl = document.getElementById(`${prefix}-save-dot`);
+            if (!timeEl || !dotEl) return;
+
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS[prefix]);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.savedAt) {
+                        timeEl.textContent = formatTimestamp(data.savedAt);
+                        timeEl.classList.remove('never');
+                        dotEl.classList.add('saved');
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('读取保存时间失败:', e);
+            }
+            // 无保存数据
+            timeEl.textContent = '尚未保存';
+            timeEl.classList.add('never');
+            dotEl.classList.remove('saved');
+        }
+
+        // 手动保存：将当前数据持久化存储
+        function manualSave(prefix) {
+            saveToStorage(prefix);
+            updateSaveTimeDisplay(prefix);
+        }
+
+        // 显示"已恢复"Toast 提示
+        function showRestoreToast() {
+            let toast = document.querySelector('.restore-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'restore-toast';
+                toast.textContent = '✓ 已恢复上次保存的数据';
+                document.body.appendChild(toast);
+            }
+            requestAnimationFrame(() => toast.classList.add('show'));
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 从 localStorage 恢复数据
+        function restoreFromStorage(prefix) {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEYS[prefix]);
+                if (!saved) return false;
+
+                const data = JSON.parse(saved);
+
+                if (data.date1 !== undefined) document.getElementById(`${prefix}-date1`).value = data.date1;
+                if (data.date2 !== undefined && data.date2) document.getElementById(`${prefix}-date2`).value = data.date2;
+                if (data.input1 !== undefined) document.getElementById(`${prefix}-input1`).value = data.input1;
+                if (data.input2 !== undefined) document.getElementById(`${prefix}-input2`).value = data.input2;
+                if (data.input3 !== undefined) document.getElementById(`${prefix}-input3`).value = data.input3;
+                if (data.input4 !== undefined) document.getElementById(`${prefix}-input4`).value = data.input4;
+
+                // 重新计算，确保输入框3的只读状态正确
+                updateCalc(prefix);
+                return true;
+            } catch (e) {
+                console.error('恢复数据失败:', e);
+                return false;
+            }
+        }
+
+        // 一键清除所有已保存数据（两个页面）
+        function clearAllSavedData() {
+            if (!confirm('确定要清除所有已保存的数据吗？此操作不可撤销。')) return;
+
+            localStorage.removeItem(STORAGE_KEYS.elec);
+            localStorage.removeItem(STORAGE_KEYS.water);
+
+            resetForm('elec');
+            resetForm('water');
+
+            updateSaveTimeDisplay('elec');
+            updateSaveTimeDisplay('water');
+        }
+
+        // 重置表单
+        function resetForm(prefix) {
+            const defaults = { elec: '0.55', water: '2.8' };
+
+            document.getElementById(`${prefix}-date1`).value = '';
+            document.getElementById(`${prefix}-date2`).value = getToday();
+            document.getElementById(`${prefix}-input1`).value = '';
+            document.getElementById(`${prefix}-input2`).value = '';
+            document.getElementById(`${prefix}-input3`).value = '';
+            document.getElementById(`${prefix}-input3`).readOnly = false;
+            document.getElementById(`${prefix}-input4`).value = defaults[prefix];
+
+            const badge = document.getElementById(`${prefix}-badge3`);
+            badge.textContent = '手动输入';
+            badge.classList.add('manual');
+
+            // 清除该页面的 localStorage
+            localStorage.removeItem(STORAGE_KEYS[prefix]);
+
+            // 重置保存时间显示
+            const timeEl = document.getElementById(`${prefix}-save-time`);
+            const dotEl = document.getElementById(`${prefix}-save-dot`);
+            if (timeEl) {
+                timeEl.textContent = '尚未保存';
+                timeEl.classList.add('never');
+            }
+            if (dotEl) dotEl.classList.remove('saved');
+
+            updateResult(prefix);
+        }
+
+        // 初始化
+        function init() {
+            const today = getToday();
+
+            // 输入框2 的日期默认为今天
+            document.getElementById('elec-date2').value = today;
+            document.getElementById('water-date2').value = today;
+
+            // 电费事件监听（仅实时计算，不自动保存）
+            document.getElementById('elec-input1').addEventListener('input', () => updateCalc('elec'));
+            document.getElementById('elec-input2').addEventListener('input', () => updateCalc('elec'));
+            document.getElementById('elec-input3').addEventListener('input', () => updateResult('elec'));
+            document.getElementById('elec-input4').addEventListener('input', () => updateResult('elec'));
+
+            // 水费事件监听（仅实时计算，不自动保存）
+            document.getElementById('water-input1').addEventListener('input', () => updateCalc('water'));
+            document.getElementById('water-input2').addEventListener('input', () => updateCalc('water'));
+            document.getElementById('water-input3').addEventListener('input', () => updateResult('water'));
+            document.getElementById('water-input4').addEventListener('input', () => updateResult('water'));
+
+            // 从 localStorage 恢复已保存的数据
+            const restoredElec = restoreFromStorage('elec');
+            const restoredWater = restoreFromStorage('water');
+
+            if (restoredElec || restoredWater) {
+                showRestoreToast();
+            }
+
+            // 更新"上次保存时间"显示
+            updateSaveTimeDisplay('elec');
+            updateSaveTimeDisplay('water');
+
+            // 初始计算
+            updateResult('elec');
+            updateResult('water');
+        }
+
+        init();
+    </script>
+</body>
+</html>
