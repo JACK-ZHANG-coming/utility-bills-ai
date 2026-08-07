@@ -20,23 +20,12 @@
 
         .container {
             width: 100%;
-            max-width: 580px;
+            max-width: 1200px;
             background: #ffffff;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-        }
-
-        /* Container 相对定位，用于放置 GitHub 图标 */
-        .container {
             position: relative;
-        }
-
-        /* Header */
-        .header {
-            padding: 28px 32px 20px;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
         }
 
         /* GitHub 图标 */
@@ -53,18 +42,17 @@
             background: #f5f5f5;
             transition: all 0.25s ease;
             z-index: 10;
+            text-decoration: none;
         }
-        .github-link:hover {
-            background: #24292f;
-        }
-        .github-link svg {
-            width: 20px;
-            height: 20px;
-            fill: #555;
-            transition: fill 0.25s ease;
-        }
-        .github-link:hover svg {
-            fill: #ffffff;
+        .github-link:hover { background: #24292f; }
+        .github-link svg { width: 20px; height: 20px; fill: #555; transition: fill 0.25s ease; }
+        .github-link:hover svg { fill: #ffffff; }
+
+        /* Header */
+        .header {
+            padding: 28px 32px 16px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
         }
         .header h1 {
             font-size: 22px;
@@ -77,26 +65,342 @@
             margin-top: 6px;
         }
 
-        /* Tabs */
+        /* ==================== Layout: Sidebar + Main ==================== */
+        .body-layout {
+            display: flex;
+            min-height: 520px;
+            position: relative;
+        }
+
+        /* ==================== Sidebar ==================== */
+        .sidebar {
+            flex-shrink: 0;
+            width: 220px;
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.28s ease;
+            overflow: hidden;
+        }
+        .sidebar.collapsed {
+            width: 0;
+            border-right: none;
+        }
+        /* 收起时隐藏侧边栏所有内部内容 */
+        .sidebar.collapsed .sidebar-header,
+        .sidebar.collapsed .room-list,
+        .sidebar.collapsed .sidebar-footer {
+            display: none;
+        }
+
+        /* 收起时显示的悬浮展开按钮 */
+        .btn-expand-floating {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 10px;
+            background: #6366f1;
+            color: #ffffff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
+            transition: all 0.2s ease;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-10px);
+        }
+        .btn-expand-floating.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0);
+        }
+        .btn-expand-floating:hover {
+            background: #4f46e5;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
+            transform: scale(1.08);
+        }
+        .btn-expand-floating svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .sidebar-header {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            min-height: 50px;
+        }
+        .sidebar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .btn-toggle-sidebar {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f1f5f9;
+            color: #475569;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+        .btn-toggle-sidebar:hover {
+            background: #6366f1;
+            border-color: #6366f1;
+            color: #ffffff;
+        }
+        .btn-toggle-sidebar svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Room List in Sidebar */
+        .room-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .room-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1.5px solid transparent;
+            position: relative;
+        }
+        .room-list-item:hover {
+            background: #f1f5f9;
+        }
+        .room-list-item.active {
+            background: #eef2ff;
+            border-color: #c7d2fe;
+        }
+
+        .room-list-item .room-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            color: #fff;
+            flex-shrink: 0;
+            background: var(--badge-color, #6366f1);
+        }
+
+        .room-list-item .room-list-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            transition: opacity 0.2s ease;
+        }
+        .room-list-item.active .room-list-name {
+            color: #4338ca;
+            font-weight: 600;
+        }
+
+        .room-list-item .room-list-delete {
+            width: 22px;
+            height: 22px;
+            border: none;
+            border-radius: 5px;
+            background: transparent;
+            color: #cbd5e1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        .room-list-item:hover .room-list-delete { opacity: 1; }
+        .room-list-item .room-list-delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .room-list-item .room-list-delete:disabled {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .room-list-item .room-list-delete svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        /* Add Room button in sidebar */
+        .sidebar-footer {
+            padding: 8px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .btn-add-room {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px dashed #c7d2fe;
+            border-radius: 10px;
+            background: #f5f3ff;
+            color: #6366f1;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-add-room:hover {
+            border-color: #6366f1;
+            background: #ede9fe;
+        }
+        .sidebar.collapsed .btn-add-room {
+            padding: 10px;
+        }
+
+        /* ==================== Main Area ==================== */
+        .main-area {
+            flex: 1;
+            padding: 24px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-area .room-panel {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Room Header */
+        .room-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            background: var(--header-bg, #f5f5f5);
+        }
+
+        .room-header .room-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+            flex-shrink: 0;
+            background: var(--badge-color, #6366f1);
+        }
+
+        .room-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a1a;
+            outline: none;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s, background 0.2s;
+            min-width: 50px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: text;
+        }
+        .room-name:hover {
+            background: rgba(99, 102, 241, 0.08);
+        }
+        .room-name:focus {
+            border-bottom-color: #6366f1;
+            background: rgba(255, 255, 255, 0.6);
+        }
+        .edit-icon {
+            color: #9ca3af;
+            flex-shrink: 0;
+        }
+
+        .room-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .btn-clear-room {
+            padding: 5px 12px;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            background: #fef2f2;
+            color: #dc2626;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+        .btn-clear-room:hover {
+            background: #fee2e2;
+            border-color: #f87171;
+            color: #b91c1c;
+        }
+
+        /* ==================== Tabs ==================== */
         .tabs {
             display: flex;
-            padding: 16px 32px 0;
+            padding: 12px 20px 0;
             gap: 6px;
         }
         .tab {
             flex: 1;
-            padding: 12px 16px;
+            padding: 10px 12px;
             border: none;
             background: #f5f5f5;
             border-radius: 10px 10px 0 0;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
             color: #888;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             transition: all 0.25s ease;
             font-family: inherit;
         }
@@ -106,14 +410,14 @@
             font-weight: 600;
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
         }
-        .tab.active[data-tab="electricity"] { color: #d97706; }
+        .tab.active[data-tab="elec"] { color: #d97706; }
         .tab.active[data-tab="water"] { color: #0891b2; }
-        .tab-icon { font-size: 18px; }
+        .tab-icon { font-size: 16px; }
 
         /* Tab Content */
         .tab-content {
             display: none;
-            padding: 24px 32px 32px;
+            padding: 20px 20px 24px;
         }
         .tab-content.active {
             display: block;
@@ -124,15 +428,26 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Form Rows */
-        .form-row { margin-bottom: 18px; }
+        /* ==================== Form Rows ==================== */
+        .form-row { margin-bottom: 16px; }
         .form-row.with-date {
             display: flex;
             gap: 12px;
             align-items: flex-end;
         }
-        .date-group { flex-shrink: 0; width: 155px; }
-        .reading-group { flex: 1; }
+        .date-group { flex-shrink: 0; width: 140px; }
+        .reading-group { flex: 1; min-width: 0; }
+
+        /* 侧边栏展开时：日期和度数各自撑满整行（垂直堆叠） */
+        .sidebar:not(.collapsed) ~ .main-area .form-row.with-date {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+        .sidebar:not(.collapsed) ~ .main-area .date-group,
+        .sidebar:not(.collapsed) ~ .main-area .reading-group {
+            width: 100%;
+        }
 
         .field-label {
             display: block;
@@ -150,10 +465,10 @@
 
         .field-input {
             width: 100%;
-            padding: 11px 14px;
+            padding: 10px 14px;
             border: 1.5px solid #e5e5e5;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 15px;
             color: #1a1a1a;
             background: #ffffff;
             transition: all 0.2s ease;
@@ -176,7 +491,7 @@
 
         .date-input {
             width: 100%;
-            padding: 11px 12px;
+            padding: 10px 12px;
             border: 1.5px solid #e5e5e5;
             border-radius: 10px;
             font-size: 14px;
@@ -217,37 +532,37 @@
             color: #b45309;
         }
 
-        /* Result Card */
+        /* ==================== Result Card ==================== */
         .result-card {
-            margin-top: 24px;
-            padding: 24px;
+            margin-top: 20px;
+            padding: 20px;
             border-radius: 14px;
             text-align: center;
             transition: all 0.3s ease;
         }
-        #electricity .result-card {
+        .tab-content[data-type="elec"] .result-card {
             background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
             border: 1px solid #fed7aa;
         }
-        #water .result-card {
+        .tab-content[data-type="water"] .result-card {
             background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);
             border: 1px solid #a5f3fc;
         }
 
         .result-label {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
             margin-bottom: 8px;
             font-weight: 500;
         }
         .result-value {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
             letter-spacing: -0.5px;
             transition: color 0.2s ease;
         }
-        #electricity .result-value { color: #c2410c; }
-        #water .result-value { color: #0e7490; }
+        .tab-content[data-type="elec"] .result-value { color: #c2410c; }
+        .tab-content[data-type="water"] .result-value { color: #0e7490; }
         .result-value.empty { color: #ccc; }
         .result-formula {
             font-size: 13px;
@@ -256,66 +571,10 @@
             min-height: 18px;
         }
 
-        /* Actions */
-        .actions {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .actions-btns {
-            display: flex;
-            gap: 8px;
-        }
-        .btn-reset {
-            padding: 8px 20px;
-            border: 1.5px solid #e5e5e5;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-        .btn-reset:hover {
-            border-color: #ccc;
-            color: #333;
-            background: #f8f8f8;
-        }
-        .btn-clear {
-            padding: 8px 16px;
-            border: 1.5px solid #fca5a5;
-            border-radius: 8px;
-            background: #fef2f2;
-            color: #dc2626;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-        .btn-clear:hover {
-            background: #fee2e2;
-            border-color: #f87171;
-            color: #b91c1c;
-        }
-        .save-indicator {
-            font-size: 12px;
-            color: #16a34a;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .save-indicator.show { opacity: 1; }
-
-        /* Save Status Bar */
+        /* ==================== Save Status Bar ==================== */
         .save-status-bar {
-            margin-top: 16px;
-            padding: 12px 16px;
+            margin-top: 14px;
+            padding: 10px 14px;
             border-radius: 10px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
@@ -323,7 +582,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 8px;
-            font-size: 13px;
+            font-size: 12px;
         }
         .save-status-bar .save-label {
             color: #64748b;
@@ -347,18 +606,44 @@
             flex-shrink: 0;
             transition: background 0.3s ease;
         }
-        .save-status-bar .save-dot.saved {
-            background: #22c55e;
-        }
+        .save-status-bar .save-dot.saved { background: #22c55e; }
 
-        /* Save Button */
+        /* ==================== Actions ==================== */
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .actions-btns {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-reset {
+            padding: 7px 16px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-reset:hover {
+            border-color: #ccc;
+            color: #333;
+            background: #f8f8f8;
+        }
         .btn-save {
-            padding: 8px 20px;
+            padding: 7px 16px;
             border: 1.5px solid #3b82f6;
             border-radius: 8px;
             background: #3b82f6;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: inherit;
@@ -368,9 +653,18 @@
             background: #2563eb;
             border-color: #2563eb;
         }
-        .btn-save:active {
-            transform: scale(0.96);
+        .btn-save:active { transform: scale(0.96); }
+
+        .save-indicator {
+            font-size: 12px;
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
+        .save-indicator.show { opacity: 1; }
 
         .restore-toast {
             position: fixed;
@@ -401,16 +695,28 @@
         }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* Responsive */
-        @media (max-width: 520px) {
-            .form-row.with-date { flex-direction: column; gap: 12px; }
-            .date-group { width: 100%; }
-            .tab-content { padding: 20px 20px 28px; }
-            .header { padding: 24px 20px 16px; }
-            .tabs { padding: 12px 20px 0; }
-            .result-value { font-size: 30px; }
+        /* ==================== Responsive ==================== */
+        @media (max-width: 640px) {
+            body { padding: 16px 8px; }
+            .header { padding: 24px 16px 12px; }
+            .sidebar { width: 180px; }
+            .main-area { padding: 16px; }
+            .tab-content { padding: 16px 16px 20px; }
+            .tabs { padding: 10px 16px 0; }
+            .result-value { font-size: 28px; }
             .actions { flex-direction: column; align-items: stretch; }
             .actions-btns { justify-content: flex-end; }
+            .room-header { padding: 12px 16px; }
+        }
+
+        /* Mobile: sidebar becomes overlay */
+        @media (max-width: 480px) {
+            .sidebar {
+                position: absolute;
+                z-index: 100;
+                height: 100%;
+                box-shadow: 4px 0 16px rgba(0,0,0,0.1);
+            }
         }
     </style>
 </head>
@@ -428,178 +734,86 @@
             <div class="subtitle">输入抄表数据，自动计算费用</div>
         </div>
 
-        <div class="tabs">
-            <button class="tab active" data-tab="electricity" onclick="switchTab('electricity')">
-                <span class="tab-icon">⚡</span>
-                <span>电费计算</span>
+        <div class="body-layout">
+            <!-- 收起时显示的悬浮展开按钮 -->
+            <button class="btn-expand-floating" id="btn-expand-floating" onclick="toggleSidebar()" title="展开侧边栏">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
             </button>
-            <button class="tab" data-tab="water" onclick="switchTab('water')">
-                <span class="tab-icon">💧</span>
-                <span>水费计算</span>
-            </button>
-        </div>
+            <!-- 侧边栏：房间列表 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">房间列表</span>
+                    <button class="btn-toggle-sidebar" onclick="toggleSidebar()" title="收起/展开侧边栏">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="room-list" id="room-list">
+                    <!-- 房间列表项由 JS 动态生成 -->
+                </div>
+                <div class="sidebar-footer">
+                    <button class="btn-add-room" onclick="addRoom()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <span>新增房间</span>
+                    </button>
+                </div>
+            </aside>
 
-        <!-- ==================== 电费计算 ==================== -->
-        <div class="tab-content active" id="electricity">
-            <!-- 输入框1：上期电表度数（左侧带日期） -->
-            <div class="form-row with-date">
-                <div class="date-group">
-                    <label class="field-label">抄表日期</label>
-                    <input type="date" class="date-input" id="elec-date1">
-                </div>
-                <div class="reading-group">
-                    <label class="field-label">上期电表度数</label>
-                    <div class="input-wrap has-unit">
-                        <input type="number" step="any" class="field-input" id="elec-input1" placeholder="0">
-                        <span class="unit">度</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 输入框2：本期电表度数（左侧带日期，默认今天） -->
-            <div class="form-row with-date">
-                <div class="date-group">
-                    <label class="field-label">抄表日期</label>
-                    <input type="date" class="date-input" id="elec-date2">
-                </div>
-                <div class="reading-group">
-                    <label class="field-label">本期电表度数</label>
-                    <div class="input-wrap has-unit">
-                        <input type="number" step="any" class="field-input" id="elec-input2" placeholder="0">
-                        <span class="unit">度</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 输入框3：用电量（自动计算或手动输入） -->
-            <div class="form-row">
-                <label class="field-label">
-                    用电量
-                    <span class="auto-badge manual" id="elec-badge3">手动输入</span>
-                </label>
-                <div class="input-wrap has-unit">
-                    <input type="number" step="any" class="field-input" id="elec-input3" placeholder="0">
-                    <span class="unit">度</span>
-                </div>
-            </div>
-
-            <!-- 输入框4：单价 -->
-            <div class="form-row">
-                <label class="field-label">单价</label>
-                <div class="input-wrap has-unit">
-                    <input type="number" step="any" class="field-input" id="elec-input4" value="0.55">
-                    <span class="unit">元/度</span>
-                </div>
-            </div>
-
-            <!-- 结果行 -->
-            <div class="result-card">
-                <div class="result-label">应缴电费</div>
-                <div class="result-value empty" id="elec-result">¥ 0</div>
-                <div class="result-formula" id="elec-formula"></div>
-            </div>
-
-            <!-- 上次保存时间状态 -->
-            <div class="save-status-bar" id="elec-save-status">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span class="save-dot" id="elec-save-dot"></span>
-                    <span class="save-label">上次保存时间</span>
-                </div>
-                <span class="save-time never" id="elec-save-time">尚未保存</span>
-            </div>
-
-            <div class="actions">
-                <span class="save-indicator" id="elec-save-indicator">✓ 已保存</span>
-                <div class="actions-btns">
-                    <button class="btn-save" onclick="manualSave('elec')">保存数据</button>
-                    <button class="btn-clear" onclick="clearAllSavedData()">清除已保存数据</button>
-                    <button class="btn-reset" onclick="resetForm('elec')">重置</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==================== 水费计算 ==================== -->
-        <div class="tab-content" id="water">
-            <!-- 输入框1：上期水表度数（左侧带日期） -->
-            <div class="form-row with-date">
-                <div class="date-group">
-                    <label class="field-label">抄表日期</label>
-                    <input type="date" class="date-input" id="water-date1">
-                </div>
-                <div class="reading-group">
-                    <label class="field-label">上期水表度数</label>
-                    <div class="input-wrap has-unit">
-                        <input type="number" step="any" class="field-input" id="water-input1" placeholder="0">
-                        <span class="unit">吨</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 输入框2：本期水表度数（左侧带日期，默认今天） -->
-            <div class="form-row with-date">
-                <div class="date-group">
-                    <label class="field-label">抄表日期</label>
-                    <input type="date" class="date-input" id="water-date2">
-                </div>
-                <div class="reading-group">
-                    <label class="field-label">本期水表度数</label>
-                    <div class="input-wrap has-unit">
-                        <input type="number" step="any" class="field-input" id="water-input2" placeholder="0">
-                        <span class="unit">吨</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 输入框3：用水量（自动计算或手动输入） -->
-            <div class="form-row">
-                <label class="field-label">
-                    用水量
-                    <span class="auto-badge manual" id="water-badge3">手动输入</span>
-                </label>
-                <div class="input-wrap has-unit">
-                    <input type="number" step="any" class="field-input" id="water-input3" placeholder="0">
-                    <span class="unit">吨</span>
-                </div>
-            </div>
-
-            <!-- 输入框4：单价 -->
-            <div class="form-row">
-                <label class="field-label">单价</label>
-                <div class="input-wrap has-unit">
-                    <input type="number" step="any" class="field-input" id="water-input4" value="2.8">
-                    <span class="unit">元/吨</span>
-                </div>
-            </div>
-
-            <!-- 结果行 -->
-            <div class="result-card">
-                <div class="result-label">应缴水费</div>
-                <div class="result-value empty" id="water-result">¥ 0</div>
-                <div class="result-formula" id="water-formula"></div>
-            </div>
-
-            <!-- 上次保存时间状态 -->
-            <div class="save-status-bar" id="water-save-status">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span class="save-dot" id="water-save-dot"></span>
-                    <span class="save-label">上次保存时间</span>
-                </div>
-                <span class="save-time never" id="water-save-time">尚未保存</span>
-            </div>
-
-            <div class="actions">
-                <span class="save-indicator" id="water-save-indicator">✓ 已保存</span>
-                <div class="actions-btns">
-                    <button class="btn-save" onclick="manualSave('water')">保存数据</button>
-                    <button class="btn-clear" onclick="clearAllSavedData()">清除已保存数据</button>
-                    <button class="btn-reset" onclick="resetForm('water')">重置</button>
-                </div>
-            </div>
+            <!-- 主区域：单房间展示 -->
+            <main class="main-area" id="main-area">
+                <!-- 当前选中房间的面板由 JS 动态渲染 -->
+            </main>
         </div>
     </div>
 
     <script>
-        // 获取今天的日期（YYYY-MM-DD 格式）
+        // ==================== 配置 ====================
+        const TABS = ['elec', 'water'];
+        const TAB_CONFIG = {
+            elec:  { icon: '⚡', label: '电费', meterLabel: '电表', unit: '度', priceUnit: '元/度', resultLabel: '应缴电费', usageLabel: '用电量', defaultPrice: '0.55' },
+            water: { icon: '💧', label: '水费', meterLabel: '水表', unit: '吨', priceUnit: '元/吨', resultLabel: '应缴水费', usageLabel: '用水量', defaultPrice: '2.8' }
+        };
+
+        // 房间头部颜色调色板（循环使用）
+        const ROOM_COLORS = [
+            { headerBg: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', badgeBg: '#6366f1' },
+            { headerBg: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)', badgeBg: '#8b5cf6' },
+            { headerBg: 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)', badgeBg: '#10b981' },
+            { headerBg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', badgeBg: '#f59e0b' },
+            { headerBg: 'linear-gradient(135deg, #ecfeff 0%, #cffafe 100%)', badgeBg: '#06b6d4' },
+            { headerBg: 'linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%)', badgeBg: '#d946ef' },
+            { headerBg: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)', badgeBg: '#ef4444' },
+            { headerBg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', badgeBg: '#22c55e' },
+        ];
+
+        // 持久化键
+        const ROOM_LIST_KEY = 'utility-bills-room-list';
+        const ROOM_COUNTER_KEY = 'utility-bills-room-counter';
+        const SELECTED_ROOM_KEY = 'utility-bills-selected-room';
+        const SIDEBAR_COLLAPSED_KEY = 'utility-bills-sidebar-collapsed';
+
+        // 动态房间状态
+        let roomList = [];
+        let roomCounter = 0;
+        let selectedRoomId = null;
+
+        // ==================== 存储键辅助函数 ====================
+        function getStorageKey(prefix) {
+            return `utility-bills-${prefix}`;
+        }
+        function getRoomNameKey(roomId) {
+            return `utility-bills-${roomId}-name`;
+        }
+
+        // ==================== 工具函数 ====================
         function getToday() {
             const today = new Date();
             const y = today.getFullYear();
@@ -608,63 +822,379 @@
             return `${y}-${m}-${d}`;
         }
 
-        // 切换 Tab
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-        }
-
-        // 格式化数字：去除浮点误差，保留完整小数位
         function formatNumber(num) {
             if (num === 0) return '0';
             return parseFloat(num.toPrecision(12)).toString();
         }
 
-        // 输入框3 的自动计算逻辑
-        // 规则：当输入框1或2有值时 → 只读 + 自动计算（输入框2 - 输入框1）
-        //       当输入框1和2均无值时 → 允许手动输入
+        function formatTimestamp(isoString) {
+            const d = new Date(isoString);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            const s = String(d.getSeconds()).padStart(2, '0');
+            return `${y}-${m}-${day} ${h}:${min}:${s}`;
+        }
+
+        function getRoomName(roomId) {
+            const saved = localStorage.getItem(getRoomNameKey(roomId));
+            if (saved) return saved;
+            const idx = roomList.indexOf(roomId);
+            return `房间${idx >= 0 ? idx + 1 : '?'}`;
+        }
+
+        function getRoomIndex(roomId) {
+            return roomList.indexOf(roomId);
+        }
+
+        function getRoomColor(roomId) {
+            const idx = getRoomIndex(roomId);
+            return ROOM_COLORS[idx % ROOM_COLORS.length];
+        }
+
+        // ==================== 房间列表持久化 ====================
+        function loadRoomList() {
+            try {
+                const saved = localStorage.getItem(ROOM_LIST_KEY);
+                if (saved) {
+                    const list = JSON.parse(saved);
+                    if (Array.isArray(list) && list.length > 0) {
+                        roomList = list;
+                        roomCounter = parseInt(localStorage.getItem(ROOM_COUNTER_KEY)) || 0;
+                        roomList.forEach(id => {
+                            const num = parseInt(id.replace('r', ''));
+                            if (num > roomCounter) roomCounter = num;
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('加载房间列表失败:', e);
+            }
+            roomList = ['r1', 'r2'];
+            roomCounter = 2;
+            saveRoomList();
+        }
+
+        function saveRoomList() {
+            localStorage.setItem(ROOM_LIST_KEY, JSON.stringify(roomList));
+            localStorage.setItem(ROOM_COUNTER_KEY, String(roomCounter));
+        }
+
+        // ==================== 选中房间持久化 ====================
+        function loadSelectedRoom() {
+            const saved = localStorage.getItem(SELECTED_ROOM_KEY);
+            if (saved && roomList.includes(saved)) {
+                selectedRoomId = saved;
+            } else {
+                selectedRoomId = roomList[0];
+            }
+        }
+
+        function saveSelectedRoom() {
+            localStorage.setItem(SELECTED_ROOM_KEY, selectedRoomId);
+        }
+
+        // ==================== 侧边栏折叠状态 ====================
+        function loadSidebarState() {
+            const collapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+            const sidebar = document.getElementById('sidebar');
+            const floatBtn = document.getElementById('btn-expand-floating');
+            if (collapsed) {
+                sidebar.classList.add('collapsed');
+                floatBtn.classList.add('visible');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const floatBtn = document.getElementById('btn-expand-floating');
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem(SIDEBAR_COLLAPSED_KEY, isCollapsed);
+            floatBtn.classList.toggle('visible', isCollapsed);
+        }
+
+        // ==================== HTML 生成 ====================
+        // 生成单个 Tab 内容（电费或水费）
+        function createTabContent(prefix, tab) {
+            const cfg = TAB_CONFIG[tab];
+            return `
+            <div class="form-row with-date">
+                <div class="date-group">
+                    <label class="field-label">抄表日期</label>
+                    <input type="date" class="date-input" id="${prefix}-date1">
+                </div>
+                <div class="reading-group">
+                    <label class="field-label">上期${cfg.meterLabel}度数</label>
+                    <div class="input-wrap has-unit">
+                        <input type="number" step="any" class="field-input" id="${prefix}-input1" placeholder="0">
+                        <span class="unit">${cfg.unit}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row with-date">
+                <div class="date-group">
+                    <label class="field-label">抄表日期</label>
+                    <input type="date" class="date-input" id="${prefix}-date2">
+                </div>
+                <div class="reading-group">
+                    <label class="field-label">本期${cfg.meterLabel}度数</label>
+                    <div class="input-wrap has-unit">
+                        <input type="number" step="any" class="field-input" id="${prefix}-input2" placeholder="0">
+                        <span class="unit">${cfg.unit}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <label class="field-label">
+                    ${cfg.usageLabel}
+                    <span class="auto-badge manual" id="${prefix}-badge3">手动输入</span>
+                </label>
+                <div class="input-wrap has-unit">
+                    <input type="number" step="any" class="field-input" id="${prefix}-input3" placeholder="0">
+                    <span class="unit">${cfg.unit}</span>
+                </div>
+            </div>
+            <div class="form-row">
+                <label class="field-label">单价</label>
+                <div class="input-wrap has-unit">
+                    <input type="number" step="any" class="field-input" id="${prefix}-input4" value="${cfg.defaultPrice}">
+                    <span class="unit">${cfg.priceUnit}</span>
+                </div>
+            </div>
+            <div class="result-card">
+                <div class="result-label">${cfg.resultLabel}</div>
+                <div class="result-value empty" id="${prefix}-result">¥ 0</div>
+                <div class="result-formula" id="${prefix}-formula"></div>
+            </div>
+            <div class="save-status-bar" id="${prefix}-save-status">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="save-dot" id="${prefix}-save-dot"></span>
+                    <span class="save-label">上次保存时间</span>
+                </div>
+                <span class="save-time never" id="${prefix}-save-time">尚未保存</span>
+            </div>
+            <div class="actions">
+                <span class="save-indicator" id="${prefix}-save-indicator">✓ 已保存</span>
+                <div class="actions-btns">
+                    <button class="btn-save" onclick="manualSave('${prefix}')">保存数据</button>
+                    <button class="btn-reset" onclick="resetForm('${prefix}')">重置</button>
+                </div>
+            </div>`;
+        }
+
+        // 生成整个房间面板（主区域用）
+        function createRoomPanel(roomId) {
+            const idx = getRoomIndex(roomId);
+            const defaultName = `房间${idx + 1}`;
+            const badge = String(idx + 1);
+            const color = getRoomColor(roomId);
+
+            let tabsHTML = '';
+            let contentsHTML = '';
+            TABS.forEach((tab, tabIdx) => {
+                const cfg = TAB_CONFIG[tab];
+                const prefix = `${roomId}-${tab}`;
+                tabsHTML += `
+                <button class="tab ${tabIdx === 0 ? 'active' : ''}" data-room="${roomId}" data-tab="${tab}" onclick="switchTab('${roomId}', '${tab}')">
+                    <span class="tab-icon">${cfg.icon}</span>
+                    <span>${cfg.label}</span>
+                </button>`;
+                contentsHTML += `
+                <div class="tab-content ${tabIdx === 0 ? 'active' : ''}" data-type="${tab}" id="${prefix}">
+                    ${createTabContent(prefix, tab)}
+                </div>`;
+            });
+
+            return `
+            <div class="room-panel" data-room="${roomId}" id="${roomId}"
+                 style="--badge-color: ${color.badgeBg}; --header-bg: ${color.headerBg};">
+                <div class="room-header">
+                    <div class="room-badge">${badge}</div>
+                    <span class="room-name" contenteditable="true" id="${roomId}-name" data-default="${defaultName}" spellcheck="false">${defaultName}</span>
+                    <svg class="edit-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    <div class="room-actions">
+                        <button class="btn-clear-room" onclick="clearRoomData('${roomId}')">清除</button>
+                    </div>
+                </div>
+                <div class="tabs">${tabsHTML}</div>
+                ${contentsHTML}
+            </div>`;
+        }
+
+        // 生成侧边栏房间列表项
+        function createRoomListItem(roomId) {
+            const idx = getRoomIndex(roomId);
+            const name = getRoomName(roomId);
+            const badge = String(idx + 1);
+            const color = getRoomColor(roomId);
+            const isActive = roomId === selectedRoomId;
+
+            return `
+            <div class="room-list-item ${isActive ? 'active' : ''}" data-room="${roomId}" onclick="selectRoom('${roomId}')" title="${name}">
+                <div class="room-badge" style="background: ${color.badgeBg};">${badge}</div>
+                <span class="room-list-name">${name}</span>
+                <button class="room-list-delete" onclick="deleteRoom(event, '${roomId}')" title="删除房间">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>`;
+        }
+
+        // ==================== 渲染 ====================
+        function renderSidebar() {
+            const listEl = document.getElementById('room-list');
+            listEl.innerHTML = roomList.map(id => createRoomListItem(id)).join('');
+            updateDeleteButtonStates();
+        }
+
+        function renderMainArea() {
+            const mainEl = document.getElementById('main-area');
+            if (!selectedRoomId || !roomList.includes(selectedRoomId)) {
+                selectedRoomId = roomList[0];
+            }
+            mainEl.innerHTML = createRoomPanel(selectedRoomId);
+            initRoomPanel(selectedRoomId);
+        }
+
+        function renderAll() {
+            renderSidebar();
+            renderMainArea();
+        }
+
+        // ==================== 房间选择 ====================
+        function selectRoom(roomId) {
+            if (roomId === selectedRoomId) return;
+            selectedRoomId = roomId;
+            saveSelectedRoom();
+
+            // 更新侧边栏高亮
+            document.querySelectorAll('.room-list-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.room === roomId);
+            });
+
+            // 重新渲染主区域（干净切换，无残留）
+            renderMainArea();
+
+            // 恢复数据提示
+            let restored = false;
+            TABS.forEach(tab => {
+                const prefix = `${roomId}-${tab}`;
+                if (localStorage.getItem(getStorageKey(prefix))) restored = true;
+            });
+            if (restored) showRestoreToast();
+        }
+
+        // ==================== 房间管理 ====================
+        function addRoom() {
+            roomCounter++;
+            const roomId = `r${roomCounter}`;
+            roomList.push(roomId);
+            saveRoomList();
+
+            // 选中新增房间
+            selectedRoomId = roomId;
+            saveSelectedRoom();
+
+            // 重新渲染
+            renderAll();
+
+            // 滚动侧边栏到新房间
+            const newItem = document.querySelector(`.room-list-item[data-room="${roomId}"]`);
+            if (newItem) newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function deleteRoom(event, roomId) {
+            event.stopPropagation();
+            if (roomList.length <= 1) return;
+
+            const roomName = getRoomName(roomId);
+            if (!confirm(`确定要删除「${roomName}」吗？该房间的所有数据将被清除。`)) return;
+
+            // 清除该房间的所有 localStorage 数据
+            TABS.forEach(tab => {
+                localStorage.removeItem(getStorageKey(`${roomId}-${tab}`));
+            });
+            localStorage.removeItem(getRoomNameKey(roomId));
+
+            // 从房间列表移除
+            roomList = roomList.filter(id => id !== roomId);
+            saveRoomList();
+
+            // 如果删除的是当前选中的房间，切换到第一个
+            if (selectedRoomId === roomId) {
+                selectedRoomId = roomList[0];
+                saveSelectedRoom();
+            }
+
+            // 重新渲染
+            renderAll();
+        }
+
+        // 更新删除按钮的禁用状态
+        function updateDeleteButtonStates() {
+            const disabled = roomList.length <= 1;
+            document.querySelectorAll('.room-list-delete').forEach(btn => {
+                btn.disabled = disabled;
+                btn.title = disabled ? '至少保留 1 个房间' : '删除房间';
+            });
+        }
+
+        // ==================== Tab 切换 ====================
+        function switchTab(roomId, tabName) {
+            document.querySelectorAll(`.tab[data-room="${roomId}"]`).forEach(t => t.classList.remove('active'));
+            document.querySelectorAll(`#${roomId} > .tab-content`).forEach(c => c.classList.remove('active'));
+            const tabBtn = document.querySelector(`.tab[data-room="${roomId}"][data-tab="${tabName}"]`);
+            const content = document.getElementById(`${roomId}-${tabName}`);
+            if (tabBtn) tabBtn.classList.add('active');
+            if (content) content.classList.add('active');
+        }
+
+        // ==================== 计算逻辑 ====================
         function updateCalc(prefix) {
             const input1 = document.getElementById(`${prefix}-input1`);
             const input2 = document.getElementById(`${prefix}-input2`);
             const input3 = document.getElementById(`${prefix}-input3`);
             const badge  = document.getElementById(`${prefix}-badge3`);
 
+            if (!input1 || !input2 || !input3) return;
+
             const val1 = input1.value.trim();
             const val2 = input2.value.trim();
 
             if (val1 !== '' || val2 !== '') {
-                // 至少一个有值 → 输入框3 只读，自动计算
                 input3.readOnly = true;
                 badge.textContent = '自动计算';
                 badge.classList.remove('manual');
-
                 if (val1 !== '' && val2 !== '') {
-                    // 两个都有值 → 差值
                     const diff = parseFloat(val2) - parseFloat(val1);
                     input3.value = formatNumber(diff);
                 } else {
-                    // 只有一个有值 → 清空（等待两个都填入后计算）
                     input3.value = '';
                 }
             } else {
-                // 两个都无值 → 允许手动输入
                 input3.readOnly = false;
                 badge.textContent = '手动输入';
                 badge.classList.add('manual');
             }
-
             updateResult(prefix);
         }
 
-        // 更新结果行
-        // 规则：结果 = 输入框3 × 输入框4，保留完整小数位
         function updateResult(prefix) {
             const input3 = document.getElementById(`${prefix}-input3`);
             const input4 = document.getElementById(`${prefix}-input4`);
             const result = document.getElementById(`${prefix}-result`);
             const formula = document.getElementById(`${prefix}-formula`);
+
+            if (!input3 || !input4 || !result) return;
 
             const val3 = parseFloat(input3.value);
             const val4 = parseFloat(input4.value);
@@ -682,14 +1212,7 @@
             formula.textContent = `${formatNumber(val3)} × ${formatNumber(val4)} = ${formatNumber(total)}`;
         }
 
-        // ==================== localStorage 本地存储 ====================
-        // 按页面分别管理存储键值，互不干扰
-        const STORAGE_KEYS = {
-            elec: 'utility-bills-electricity',
-            water: 'utility-bills-water'
-        };
-
-        // 保存数据到 localStorage（JSON 格式）
+        // ==================== localStorage 存储 ====================
         function saveToStorage(prefix) {
             try {
                 const data = {
@@ -701,14 +1224,13 @@
                     input4: document.getElementById(`${prefix}-input4`).value,
                     savedAt: new Date().toISOString()
                 };
-                localStorage.setItem(STORAGE_KEYS[prefix], JSON.stringify(data));
+                localStorage.setItem(getStorageKey(prefix), JSON.stringify(data));
                 showSaveIndicator(prefix);
             } catch (e) {
                 console.error('保存数据失败:', e);
             }
         }
 
-        // 显示"已保存"提示（2秒后淡出）
         function showSaveIndicator(prefix) {
             const indicator = document.getElementById(`${prefix}-save-indicator`);
             if (!indicator) return;
@@ -717,26 +1239,12 @@
             indicator._timer = setTimeout(() => indicator.classList.remove('show'), 2000);
         }
 
-        // 格式化时间戳为 YYYY-MM-DD HH:mm:ss
-        function formatTimestamp(isoString) {
-            const d = new Date(isoString);
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            const h = String(d.getHours()).padStart(2, '0');
-            const min = String(d.getMinutes()).padStart(2, '0');
-            const s = String(d.getSeconds()).padStart(2, '0');
-            return `${y}-${m}-${day} ${h}:${min}:${s}`;
-        }
-
-        // 更新"上次保存时间"显示
         function updateSaveTimeDisplay(prefix) {
             const timeEl = document.getElementById(`${prefix}-save-time`);
             const dotEl = document.getElementById(`${prefix}-save-dot`);
             if (!timeEl || !dotEl) return;
-
             try {
-                const saved = localStorage.getItem(STORAGE_KEYS[prefix]);
+                const saved = localStorage.getItem(getStorageKey(prefix));
                 if (saved) {
                     const data = JSON.parse(saved);
                     if (data.savedAt) {
@@ -749,19 +1257,16 @@
             } catch (e) {
                 console.error('读取保存时间失败:', e);
             }
-            // 无保存数据
             timeEl.textContent = '尚未保存';
             timeEl.classList.add('never');
             dotEl.classList.remove('saved');
         }
 
-        // 手动保存：将当前数据持久化存储
         function manualSave(prefix) {
             saveToStorage(prefix);
             updateSaveTimeDisplay(prefix);
         }
 
-        // 显示"已恢复"Toast 提示
         function showRestoreToast() {
             let toast = document.querySelector('.restore-toast');
             if (!toast) {
@@ -775,22 +1280,17 @@
             toast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        // 从 localStorage 恢复数据
         function restoreFromStorage(prefix) {
             try {
-                const saved = localStorage.getItem(STORAGE_KEYS[prefix]);
+                const saved = localStorage.getItem(getStorageKey(prefix));
                 if (!saved) return false;
-
                 const data = JSON.parse(saved);
-
                 if (data.date1 !== undefined) document.getElementById(`${prefix}-date1`).value = data.date1;
                 if (data.date2 !== undefined && data.date2) document.getElementById(`${prefix}-date2`).value = data.date2;
                 if (data.input1 !== undefined) document.getElementById(`${prefix}-input1`).value = data.input1;
                 if (data.input2 !== undefined) document.getElementById(`${prefix}-input2`).value = data.input2;
                 if (data.input3 !== undefined) document.getElementById(`${prefix}-input3`).value = data.input3;
                 if (data.input4 !== undefined) document.getElementById(`${prefix}-input4`).value = data.input4;
-
-                // 重新计算，确保输入框3的只读状态正确
                 updateCalc(prefix);
                 return true;
             } catch (e) {
@@ -799,23 +1299,62 @@
             }
         }
 
-        // 一键清除所有已保存数据（两个页面）
-        function clearAllSavedData() {
-            if (!confirm('确定要清除所有已保存的数据吗？此操作不可撤销。')) return;
+        // ==================== 房间名称编辑 ====================
+        function loadRoomName(roomId) {
+            const nameEl = document.getElementById(`${roomId}-name`);
+            if (!nameEl) return;
 
-            localStorage.removeItem(STORAGE_KEYS.elec);
-            localStorage.removeItem(STORAGE_KEYS.water);
+            const saved = localStorage.getItem(getRoomNameKey(roomId));
+            if (saved) nameEl.textContent = saved;
 
-            resetForm('elec');
-            resetForm('water');
+            nameEl.addEventListener('blur', () => {
+                let name = nameEl.textContent.trim();
+                if (!name) name = nameEl.dataset.default;
+                nameEl.textContent = name;
+                localStorage.setItem(getRoomNameKey(roomId), name);
+                // 同步更新侧边栏名称
+                updateSidebarRoomName(roomId, name);
+            });
 
-            updateSaveTimeDisplay('elec');
-            updateSaveTimeDisplay('water');
+            nameEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    nameEl.blur();
+                }
+            });
+
+            nameEl.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text');
+                document.execCommand('insertText', false, text);
+            });
         }
 
-        // 重置表单
+        function updateSidebarRoomName(roomId, name) {
+            const item = document.querySelector(`.room-list-item[data-room="${roomId}"]`);
+            if (item) {
+                const nameEl = item.querySelector('.room-list-name');
+                if (nameEl) nameEl.textContent = name;
+                item.title = name;
+            }
+        }
+
+        // ==================== 清除/重置 ====================
+        function clearRoomData(roomId) {
+            const roomName = getRoomName(roomId);
+            if (!confirm(`确定要清除「${roomName}」的所有已保存数据吗？此操作不可撤销。`)) return;
+
+            TABS.forEach(tab => {
+                const prefix = `${roomId}-${tab}`;
+                localStorage.removeItem(getStorageKey(prefix));
+                resetForm(prefix);
+                updateSaveTimeDisplay(prefix);
+            });
+        }
+
         function resetForm(prefix) {
-            const defaults = { elec: '0.55', water: '2.8' };
+            const isElec = prefix.endsWith('-elec');
+            const defaultPrice = isElec ? '0.55' : '2.8';
 
             document.getElementById(`${prefix}-date1`).value = '';
             document.getElementById(`${prefix}-date2`).value = getToday();
@@ -823,16 +1362,16 @@
             document.getElementById(`${prefix}-input2`).value = '';
             document.getElementById(`${prefix}-input3`).value = '';
             document.getElementById(`${prefix}-input3`).readOnly = false;
-            document.getElementById(`${prefix}-input4`).value = defaults[prefix];
+            document.getElementById(`${prefix}-input4`).value = defaultPrice;
 
             const badge = document.getElementById(`${prefix}-badge3`);
-            badge.textContent = '手动输入';
-            badge.classList.add('manual');
+            if (badge) {
+                badge.textContent = '手动输入';
+                badge.classList.add('manual');
+            }
 
-            // 清除该页面的 localStorage
-            localStorage.removeItem(STORAGE_KEYS[prefix]);
+            localStorage.removeItem(getStorageKey(prefix));
 
-            // 重置保存时间显示
             const timeEl = document.getElementById(`${prefix}-save-time`);
             const dotEl = document.getElementById(`${prefix}-save-dot`);
             if (timeEl) {
@@ -844,41 +1383,46 @@
             updateResult(prefix);
         }
 
-        // 初始化
-        function init() {
+        // ==================== 初始化单个房间面板 ====================
+        function initRoomPanel(roomId) {
+            loadRoomName(roomId);
+
             const today = getToday();
+            let restored = false;
 
-            // 输入框2 的日期默认为今天
-            document.getElementById('elec-date2').value = today;
-            document.getElementById('water-date2').value = today;
+            TABS.forEach(tab => {
+                const prefix = `${roomId}-${tab}`;
 
-            // 电费事件监听（仅实时计算，不自动保存）
-            document.getElementById('elec-input1').addEventListener('input', () => updateCalc('elec'));
-            document.getElementById('elec-input2').addEventListener('input', () => updateCalc('elec'));
-            document.getElementById('elec-input3').addEventListener('input', () => updateResult('elec'));
-            document.getElementById('elec-input4').addEventListener('input', () => updateResult('elec'));
+                document.getElementById(`${prefix}-date2`).value = today;
 
-            // 水费事件监听（仅实时计算，不自动保存）
-            document.getElementById('water-input1').addEventListener('input', () => updateCalc('water'));
-            document.getElementById('water-input2').addEventListener('input', () => updateCalc('water'));
-            document.getElementById('water-input3').addEventListener('input', () => updateResult('water'));
-            document.getElementById('water-input4').addEventListener('input', () => updateResult('water'));
+                document.getElementById(`${prefix}-input1`).addEventListener('input', () => updateCalc(prefix));
+                document.getElementById(`${prefix}-input2`).addEventListener('input', () => updateCalc(prefix));
+                document.getElementById(`${prefix}-input3`).addEventListener('input', () => updateResult(prefix));
+                document.getElementById(`${prefix}-input4`).addEventListener('input', () => updateResult(prefix));
 
-            // 从 localStorage 恢复已保存的数据
-            const restoredElec = restoreFromStorage('elec');
-            const restoredWater = restoreFromStorage('water');
+                if (restoreFromStorage(prefix)) restored = true;
 
-            if (restoredElec || restoredWater) {
-                showRestoreToast();
-            }
+                updateSaveTimeDisplay(prefix);
+                updateResult(prefix);
+            });
 
-            // 更新"上次保存时间"显示
-            updateSaveTimeDisplay('elec');
-            updateSaveTimeDisplay('water');
+            return restored;
+        }
 
-            // 初始计算
-            updateResult('elec');
-            updateResult('water');
+        // ==================== 初始化 ====================
+        function init() {
+            loadRoomList();
+            loadSelectedRoom();
+            loadSidebarState();
+            renderAll();
+
+            // 检查是否有恢复的数据
+            let anyRestored = false;
+            TABS.forEach(tab => {
+                const prefix = `${selectedRoomId}-${tab}`;
+                if (localStorage.getItem(getStorageKey(prefix))) anyRestored = true;
+            });
+            if (anyRestored) showRestoreToast();
         }
 
         init();
