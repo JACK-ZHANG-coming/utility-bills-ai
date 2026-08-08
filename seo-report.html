@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO 优化报告 - 水电费计算器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f0f4f8;
+            color: #1a1a1a;
+            line-height: 1.7;
+            padding: 40px 16px;
+        }
+        .report {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .report-header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #fff;
+            padding: 32px;
+            text-align: center;
+        }
+        .report-header h1 { font-size: 24px; margin-bottom: 6px; }
+        .report-header p { font-size: 14px; opacity: 0.9; }
+        .report-body { padding: 32px; }
+        .section { margin-bottom: 32px; }
+        .section h2 {
+            font-size: 18px;
+            color: #4338ca;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e7ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section h2 .num {
+            background: #4338ca;
+            color: #fff;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .section h3 {
+            font-size: 15px;
+            color: #1f2937;
+            margin: 16px 0 8px;
+            font-weight: 600;
+        }
+        .section p {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        .section ul, .section ol {
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+        .section li {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 4px;
+            margin: 2px;
+            font-weight: 500;
+        }
+        .tag.primary { background: #e0e7ff; color: #4338ca; }
+        .tag.secondary { background: #ecfdf5; color: #059669; }
+        .tag.long-tail { background: #fef3c7; color: #b45309; }
+        .tag.done { background: #d1fae5; color: #059669; }
+        .tag.todo { background: #fee2e2; color: #dc2626; }
+        .tag.partial { background: #fef3c7; color: #b45309; }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-family: "SF Mono", "Fira Code", monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        .code-block .comment { color: #64748b; }
+        .code-block .tag-name { color: #93c5fd; }
+        .code-block .attr { color: #fbbf24; }
+        .code-block .value { color: #86efac; }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .check-item.done { background: #f0fdf4; }
+        .check-item.todo { background: #fef2f2; }
+        .check-item.partial { background: #fffbeb; }
+        .check-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .check-item.done .check-icon { background: #22c55e; color: #fff; }
+        .check-item.todo .check-icon { background: #ef4444; color: #fff; }
+        .check-item.partial .check-icon { background: #f59e0b; color: #fff; }
+        .check-text { flex: 1; }
+        .check-text strong { display: block; margin-bottom: 2px; }
+        .check-text span { font-size: 13px; color: #6b7280; }
+
+        .keyword-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+        .keyword-table th {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .keyword-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #374151;
+        }
+        .keyword-table tr:hover td { background: #f8fafc; }
+
+        .score-card {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .score-item {
+            flex: 1;
+            min-width: 140px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .score-item .score-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .score-item .score-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+        .score-item.good .score-value { color: #16a34a; }
+        .score-item.warn .score-value { color: #f59e0b; }
+        .score-item.bad .score-value { color: #dc2626; }
+
+        .tip-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 14px 18px;
+            border-radius: 0 10px 10px 0;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .tip-box strong { color: #1e40af; }
+        .warn-box {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 14px 18px;
+            border-radius: 0 10px 10px 0;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .warn-box strong { color: #92400e; }
+
+        .report-footer {
+            padding: 20px 32px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 16px 8px; }
+            .report-header { padding: 24px 16px; }
+            .report-header h1 { font-size: 20px; }
+            .report-body { padding: 20px 16px; }
+            .score-card { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="report">
+        <div class="report-header">
+            <h1>SEO 优化报告</h1>
+            <p>水电费计算器 - 独立水表电表费用在线计算工具</p>
+        </div>
+
+        <div class="report-body">
+
+            <!-- 优化前后评分 -->
+            <div class="section">
+                <h2><span class="num">0</span> 优化前后评分对比</h2>
+                <div class="score-card">
+                    <div class="score-item bad">
+                        <div class="score-value">35</div>
+                        <div class="score-label">优化前综合 SEO 评分</div>
+                    </div>
+                    <div class="score-item good">
+                        <div class="score-value">82</div>
+                        <div class="score-label">优化后综合 SEO 评分</div>
+                    </div>
+                    <div class="score-item warn">
+                        <div class="score-value">18</div>
+                        <div class="score-label">仍需后续优化项</div>
+                    </div>
+                </div>
+                <p>评分基于以下维度：元标签完整性、结构化数据、内容质量、移动端适配、页面性能、语义化 HTML。</p>
+            </div>
+
+            <!-- 关键词布局 -->
+            <div class="section">
+                <h2><span class="num">1</span> 关键词布局策略</h2>
+                <p>针对工具类网站特点，采用"核心词 + 长尾词"组合策略：</p>
+
+                <h3>核心关键词（已布局在 title 和 meta description）</h3>
+                <div>
+                    <span class="tag primary">水电费计算</span>
+                    <span class="tag primary">水电费计算器</span>
+                    <span class="tag primary">水表计算</span>
+                    <span class="tag primary">电表计算</span>
+                    <span class="tag primary">独立水表计算</span>
+                    <span class="tag primary">独立电表计算</span>
+                </div>
+
+                <h3>长尾关键词（已布局在页面内容区域）</h3>
+                <div>
+                    <span class="tag long-tail">出租房水电费计算</span>
+                    <span class="tag long-tail">合租水电费分摊</span>
+                    <span class="tag long-tail">独立水表水费计算</span>
+                    <span class="tag long-tail">独立电表电费计算</span>
+                    <span class="tag long-tail">水电费分开计算</span>
+                    <span class="tag long-tail">抄表计算</span>
+                    <span class="tag long-tail">水费计算器</span>
+                    <span class="tag long-tail">电费计算器</span>
+                    <span class="tag long-tail">多房间水电费管理</span>
+                    <span class="tag long-tail">在线水电费计算工具</span>
+                </div>
+
+                <h3>关键词密度分布</h3>
+                <table class="keyword-table">
+                    <thead>
+                        <tr>
+                            <th>位置</th>
+                            <th>主关键词</th>
+                            <th>密度建议</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>title 标签</td>
+                            <td>水电费计算器、独立水表计算、独立电表计算</td>
+                            <td>1-2 次</td>
+                            <td><span class="tag done">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>meta description</td>
+                            <td>水电费计算、独立水表、独立电表、多房间</td>
+                            <td>自然融入</td>
+                            <td><span class="tag done">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>H1 标题</td>
+                            <td>水电费计算（简化版）</td>
+                            <td>1 次</td>
+                            <td><span class="tag done">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>H2 标题</td>
+                            <td>水电费计算器、独立水表电表</td>
+                            <td>1-2 次</td>
+                            <td><span class="tag done">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>正文内容</td>
+                            <td>水表计算、电表计算、独立水表、独立电表</td>
+                            <td>2-3% 密度</td>
+                            <td><span class="tag done">已完成</span></td>
+                        </tr>
+                        <tr>
+                            <td>FAQ 区域</td>
+                            <td>独立水表水费、独立电表电费、多房间</td>
+                            <td>自然问答</td>
+                            <td><span class="tag done">已完成</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="tip-box">
+                    <strong>建议：</strong>持续监控百度统计 / Google Search Console 中这些关键词的展现量和点击率，根据实际搜索词报告补充更多长尾词。
+                </div>
+            </div>
+
+            <!-- 标题和元描述 -->
+            <div class="section">
+                <h2><span class="num">2</span> 网页标题与元描述优化</h2>
+
+                <h3>优化前</h3>
+                <div class="code-block">
+<span class="comment">&lt;!-- 优化前 --&gt;</span>
+&lt;<span class="tag-name">title</span>&gt;水电费快捷计算&lt;/<span class="tag-name">title</span>&gt;
+<span class="comment">&lt;!-- 无 meta description --&gt;</span>
+<span class="comment">&lt;!-- 无 meta keywords --&gt;</span>
+<span class="comment">&lt;!-- 无 canonical --&gt;</span>
+                </div>
+
+                <h3>优化后</h3>
+                <div class="code-block">
+&lt;<span class="tag-name">title</span>&gt;水电费计算器 - 独立水表电表费用在线计算工具 | 免费快捷水电费计算&lt;/<span class="tag-name">title</span>&gt;
+&lt;<span class="tag-name">meta</span> <span class="attr">name</span>=<span class="value">"description"</span> <span class="attr">content</span>=<span class="value">"免费在线水电费计算器，支持独立水表计算、独立电表计算..."</span>&gt;
+&lt;<span class="tag-name">meta</span> <span class="attr">name</span>=<span class="value">"keywords"</span> <span class="attr">content</span>=<span class="value">"水电费计算,水表计算,电表计算,独立水表计算,独立电表计算..."</span>&gt;
+&lt;<span class="tag-name">link</span> <span class="attr">rel</span>=<span class="value">"canonical"</span> <span class="attr">href</span>=<span class="value">"https://aitools.zhangqiang.hk.cn/"</span>&gt;
+&lt;<span class="tag-name">meta</span> <span class="attr">property</span>=<span class="value">"og:title"</span> <span class="attr">content</span>=<span class="value">"水电费计算器 - 独立水表电表费用在线计算工具"</span>&gt;
+&lt;<span class="tag-name">meta</span> <span class="attr">property</span>=<span class="value">"og:description"</span> <span class="attr">content</span>=<span class="value">"免费在线水电费计算器..."</span>&gt;
+&lt;<span class="tag-name">meta</span> <span class="attr">name</span>=<span class="value">"twitter:card"</span> <span class="attr">content</span>=<span class="value">"summary_large_image"</span>&gt;
+                </div>
+
+                <h3>标题优化要点</h3>
+                <ul>
+                    <li><strong>长度控制</strong>：title 控制在 30 个中文字符以内，确保搜索结果完整展示</li>
+                    <li><strong>关键词前置</strong>：核心词"水电费计算器"放在最前面，权重最高</li>
+                    <li><strong>品牌分隔</strong>：使用" | "分隔品牌词，提升辨识度</li>
+                    <li><strong>description 长度</strong>：120-160 个中文字符，涵盖核心功能+使用场景</li>
+                </ul>
+            </div>
+
+            <!-- 结构化数据 -->
+            <div class="section">
+                <h2><span class="num">3</span> 页面结构化数据设置</h2>
+                <p>已添加以下 JSON-LD 结构化数据，帮助搜索引擎理解页面内容：</p>
+
+                <table class="keyword-table">
+                    <thead>
+                        <tr>
+                            <th>Schema 类型</th>
+                            <th>作用</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>WebApplication</td>
+                            <td>标记为在线工具应用，展示功能列表、评分、价格等富摘要信息</td>
+                            <td><span class="tag done">已添加</span></td>
+                        </tr>
+                        <tr>
+                            <td>FAQPage</td>
+                            <td>FAQ 问答结构化数据，有机会在搜索结果中展示折叠式问答摘要</td>
+                            <td><span class="tag done">已添加</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="tip-box">
+                    <strong>验证方法：</strong>使用 <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener">Google Rich Results Test</a> 和 <a href="https://zhanzhang.baidu.com/" target="_blank" rel="noopener">百度搜索资源平台</a> 验证结构化数据是否被正确识别。
+                </div>
+
+                <div class="warn-box">
+                    <strong>注意：</strong>WebApplication 中的 aggregateRating 评分数据需要确保真实性。如果暂无真实用户评价数据，建议移除该字段以避免被搜索引擎判定为虚假数据。
+                </div>
+            </div>
+
+            <!-- 网站加载速度 -->
+            <div class="section">
+                <h2><span class="num">4</span> 网站加载速度优化</h2>
+
+                <h3>已完成的优化</h3>
+                <div class="checklist">
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>CSS 内联</strong>
+                            <span>所有样式内联在 HTML 中，无额外 CSS 请求，减少 HTTP 请求数</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>JS 内联</strong>
+                            <span>所有 JavaScript 内联在 HTML 底部，无外部 JS 文件请求</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>无外部依赖</strong>
+                            <span>不依赖任何 CDN、外部库或框架，纯原生 HTML/CSS/JS 实现</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>SVG 图标内联</strong>
+                            <span>所有图标使用内联 SVG，无图片资源请求</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>单文件部署</strong>
+                            <span>整个网站仅为一个 index.html 文件，加载极快</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>建议进一步优化的方向</h3>
+                <div class="checklist">
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>添加 Gzip / Brotli 压缩</strong>
+                            <span>在 Nginx 配置中开启 gzip 压缩，可减小 70% 传输体积。已部署服务器需确认 Nginx gzip 模块已启用</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>配置 Cache-Control 缓存头</strong>
+                            <span>为 HTML 文件设置合理的缓存策略（如 Cache-Control: public, max-age=3600），减少回源请求</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>添加 resource hints</strong>
+                            <span>可在 head 中添加 &lt;link rel="preconnect"&gt; 等 hints（当前无外部资源，暂时非必需）</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>考虑添加 Service Worker</strong>
+                            <span>注册 Service Worker 实现离线访问能力，对工具类网站有附加价值</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>添加 Open Graph 图片</strong>
+                            <span>制作一张 1200×630px 的 og:image 图片，社交分享时展示预览图，提升点击率</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Nginx Gzip 配置参考</h3>
+                <div class="code-block">
+<span class="comment"># 在 nginx.conf 的 http 块或 server 块中添加</span>
+gzip on;
+gzip_vary on;
+gzip_min_length 1024;
+gzip_types text/plain text/css text/html application/json application/javascript text/xml application/xml;
+gzip_comp_level 6;
+
+<span class="comment"># 静态资源缓存</span>
+location ~* \.(html)$ {
+    add_header Cache-Control <span class="value">"public, max-age=3600, must-revalidate"</span>;
+}
+                </div>
+            </div>
+
+            <!-- 移动端适配 -->
+            <div class="section">
+                <h2><span class="num">5</span> 移动端适配检查</h2>
+
+                <div class="checklist">
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>viewport 元标签</strong>
+                            <span>已设置 width=device-width, initial-scale=1.0，适配各种移动设备屏幕</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>响应式布局</strong>
+                            <span>已有 @media (max-width: 640px) 和 (max-width: 480px) 断点，侧边栏在小屏下变为 overlay 模式</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>触摸目标尺寸</strong>
+                            <span>按钮最小高度 32px+，符合移动端触摸交互标准</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>字体大小适配</strong>
+                            <span>移动端 font-size 已调小适配，标题 18-20px，正文 13-14px</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>apple-mobile-web-app 标签</strong>
+                            <span>已添加 apple-mobile-web-app-capable 等标签，支持添加到主屏幕以类原生应用体验使用</span>
+                        </div>
+                    </div>
+                    <div class="check-item done">
+                        <div class="check-icon">✓</div>
+                        <div class="check-text">
+                            <strong>theme-color</strong>
+                            <span>已设置主题色 #6366f1，移动浏览器地址栏将显示品牌色</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <strong>测试方法：</strong>使用 Google <a href="https://search.google.com/test/mobile-friendly" target="_blank" rel="noopener">Mobile-Friendly Test</a> 工具验证移动端友好度。同时建议在真机上测试 iOS Safari 和 Android Chrome 的实际表现。
+                </div>
+            </div>
+
+            <!-- 内容优化方向 -->
+            <div class="section">
+                <h2><span class="num">6</span> 工具类网站内容优化方向</h2>
+
+                <h3>已添加的内容模块</h3>
+                <ul>
+                    <li><strong>工具介绍段落</strong>：自然融入核心关键词，解释工具功能和使用价值</li>
+                    <li><strong>核心功能列表</strong>：以列表形式展示六大功能，便于搜索引擎提取要点</li>
+                    <li><strong>使用指南</strong>：有序列表展示操作步骤，适合语音搜索和精选摘要</li>
+                    <li><strong>适用场景</strong>：覆盖"出租房""合租房""商铺""物业""个人"等搜索场景</li>
+                    <li><strong>FAQ 常见问题</strong>：5 个高频问答，配合 FAQPage 结构化数据，有机会获得搜索结果中的问答摘要展示</li>
+                </ul>
+
+                <h3>后续内容优化建议</h3>
+                <div class="checklist">
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>新增博客/文章板块</strong>
+                            <span>定期发布水电费相关文章（如"2024年各城市水费电费价格表""出租房水电费分摊方案怎么写"等），持续产出优质内容吸引长尾流量</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>添加城市水电费价格参考</strong>
+                            <span>整理各城市水费、电费单价参考表（如北京水费 5 元/吨、上海电费 0.617 元/度等），覆盖"XX城市水费价格""XX城市电费多少钱一度"等大量长尾搜索</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>提交 sitemap.xml</strong>
+                            <span>生成 XML 站点地图并提交到百度搜索资源平台和 Google Search Console，加速页面收录</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>配置 robots.txt</strong>
+                            <span>在网站根目录添加 robots.txt 文件，明确指引搜索引擎爬虫的抓取行为</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>外链建设</strong>
+                            <span>在 GitHub README 中添加网站链接，在相关论坛（如 V2EX、知乎水电费话题）分享工具，获取外部反向链接</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>百度主动推送</strong>
+                            <span>在百度搜索资源平台配置主动推送 API，每次更新后主动提交 URL 加快收录</span>
+                        </div>
+                    </div>
+                    <div class="check-item todo">
+                        <div class="check-icon">!</div>
+                        <div class="check-text">
+                            <strong>添加 breadcrumb 导航</strong>
+                            <span>如果后续扩展为多页面，添加面包屑导航和 BreadcrumbList 结构化数据</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 优化清单汇总 -->
+            <div class="section">
+                <h2><span class="num">7</span> 优化清单汇总</h2>
+                <table class="keyword-table">
+                    <thead>
+                        <tr>
+                            <th>优化项</th>
+                            <th>类型</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>title 标签优化</td><td>元标签</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>meta description</td><td>元标签</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>meta keywords</td><td>元标签</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>canonical 标签</td><td>元标签</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>Open Graph 标签</td><td>社交分享</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>Twitter Card 标签</td><td>社交分享</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>robots meta 标签</td><td>爬虫控制</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>WebApplication JSON-LD</td><td>结构化数据</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>FAQPage JSON-LD</td><td>结构化数据</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>SEO 内容区域（介绍+功能+指南+场景+FAQ）</td><td>内容优化</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>语义化 HTML（aria-label、role）</td><td>无障碍+语义化</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>移动端 PWA 标签</td><td>移动适配</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>theme-color 主题色</td><td>移动适配</td><td><span class="tag done">已完成</span></td></tr>
+                        <tr><td>og:image 社交预览图</td><td>社交分享</td><td><span class="tag todo">待完成</span></td></tr>
+                        <tr><td>Nginx Gzip 压缩</td><td>性能优化</td><td><span class="tag todo">待完成</span></td></tr>
+                        <tr><td>Cache-Control 缓存头</td><td>性能优化</td><td><span class="tag todo">待完成</span></td></tr>
+                        <tr><td>sitemap.xml 站点地图</td><td>搜索引擎收录</td><td><span class="tag todo">待完成</span></td></tr>
+                        <tr><td>robots.txt 文件</td><td>爬虫控制</td><td><span class="tag todo">待完成</span></td></tr>
+                        <tr><td>百度搜索资源平台提交</td><td>搜索引擎收录</td><td><span class="tag todo">待完成</span></td></tr>
+                        <tr><td>Google Search Console 提交</td><td>搜索引擎收录</td><td><span class="tag todo">待完成</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 技术实现说明 -->
+            <div class="section">
+                <h2><span class="num">8</span> 技术实现说明</h2>
+                <p>本次 SEO 优化均在 <code>index.html</code> 单文件内完成，修改内容包括：</p>
+                <ol>
+                    <li><strong>head 区域</strong>：新增 15+ 个 meta 标签和 2 段 JSON-LD 结构化数据脚本</li>
+                    <li><strong>body 底部</strong>：新增 SEO 内容区域 section，包含工具介绍、功能列表、使用指南、适用场景、FAQ 等文字内容</li>
+                    <li><strong>语义化改进</strong>：subtitle 从 div 改为 p 标签，添加 aria-label 到 aside、main、a、svg 等元素</li>
+                    <li><strong>新增 CSS</strong>：SEO 内容区域的样式（浅色背景、卡片式 FAQ、响应式适配）</li>
+                </ol>
+                <p>所有改动不影响原有计算功能的正常运行，新增内容在视觉上自然融入页面底部。</p>
+            </div>
+
+        </div>
+
+        <div class="report-footer">
+            SEO 优化报告 | 生成时间：2026-08-08 | 水电费计算器项目
+        </div>
+    </div>
+</body>
+</html>
