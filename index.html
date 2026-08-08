@@ -87,14 +87,12 @@
             width: 0;
             border-right: none;
         }
-        /* 收起时隐藏侧边栏所有内部内容 */
         .sidebar.collapsed .sidebar-header,
         .sidebar.collapsed .room-list,
         .sidebar.collapsed .sidebar-footer {
             display: none;
         }
 
-        /* 收起时显示的悬浮展开按钮 */
         .btn-expand-floating {
             position: absolute;
             top: 14px;
@@ -182,7 +180,6 @@
             height: 18px;
         }
 
-        /* Room List in Sidebar */
         .room-list {
             flex: 1;
             overflow-y: auto;
@@ -269,7 +266,6 @@
             height: 13px;
         }
 
-        /* Add Room button in sidebar */
         .sidebar-footer {
             padding: 8px;
             border-top: 1px solid #e2e8f0;
@@ -295,17 +291,15 @@
             border-color: #6366f1;
             background: #ede9fe;
         }
-        .sidebar.collapsed .btn-add-room {
-            padding: 10px;
-        }
 
         /* ==================== Main Area ==================== */
         .main-area {
             flex: 1;
             padding: 24px;
-            overflow: hidden;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
+            gap: 20px;
         }
 
         .main-area .room-panel {
@@ -448,7 +442,6 @@
         .date-group { flex-shrink: 0; width: 140px; }
         .reading-group { flex: 1; min-width: 0; }
 
-        /* 侧边栏展开时：日期和度数各自撑满整行（垂直堆叠） */
         .sidebar:not(.collapsed) ~ .main-area .form-row.with-date {
             flex-direction: column;
             gap: 12px;
@@ -705,6 +698,446 @@
         }
         input[type="number"] { -moz-appearance: textfield; }
 
+        /* ==================== Records Section ==================== */
+        .records-section {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+        .records-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            background: #f9fafb;
+        }
+        .records-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .records-count {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 400;
+        }
+        .btn-add-record {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 14px;
+            border: 1.5px solid #3b82f6;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #3b82f6;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-add-record:hover {
+            background: #eff6ff;
+        }
+        .btn-add-record svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+        }
+
+        .records-list {
+            padding: 8px 20px;
+            max-height: 560px;
+            overflow-y: auto;
+        }
+        .records-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        .records-empty svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            stroke: #d1d5db;
+        }
+
+        .record-card {
+            padding: 14px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+        .record-card:last-child { border-bottom: none; }
+        .record-card:hover { background: #f9fafb; margin: 0 -20px; padding: 14px 20px; }
+
+        .record-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .record-date {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .record-total {
+            font-size: 18px;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        .record-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 20px;
+            margin-bottom: 8px;
+        }
+        .record-detail-item {
+            font-size: 13px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .record-detail-item .detail-label {
+            color: #9ca3af;
+            flex-shrink: 0;
+        }
+        .record-detail-item .detail-value {
+            color: #374151;
+            font-weight: 500;
+        }
+        .record-meter-period {
+            grid-column: 1 / -1;
+            padding: 6px 10px;
+            background: #f0f9ff;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .record-meter-period .detail-value {
+            color: #0369a1;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+        .record-remark {
+            font-size: 12px;
+            color: #9ca3af;
+            padding: 6px 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-style: italic;
+            display: none;
+        }
+        .record-remark.has-remark { display: block; }
+        .record-card-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #cbd5e1;
+        }
+        .record-card-bottom .saved-at {
+            color: #9ca3af;
+        }
+        .record-card-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .btn-record-action {
+            padding: 3px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            background: #ffffff;
+            color: #6b7280;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-record-action:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .btn-record-action.edit:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background: #eff6ff;
+        }
+        .btn-record-action.delete:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        /* ==================== Pagination ==================== */
+        .records-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 14px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .pagination-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .pagination-info {
+            font-size: 12px;
+            color: #9ca3af;
+            padding: 0 8px;
+        }
+
+        /* ==================== Modal / Dialog ==================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal {
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            transform: translateY(16px);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-overlay.open .modal {
+            transform: translateY(0);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .btn-modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            background: #f3f4f6;
+            color: #6b7280;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-modal-close:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-body .form-row {
+            margin-bottom: 14px;
+        }
+        .modal-body .form-row.inline {
+            display: flex;
+            gap: 10px;
+        }
+        .modal-body .form-row.inline > * {
+            flex: 1;
+            min-width: 0;
+        }
+        .modal-body .field-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        .modal-body .field-input,
+        .modal-body .date-input {
+            width: 100%;
+            padding: 9px 12px;
+            font-size: 14px;
+        }
+        .modal-body textarea.field-input {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        .btn-modal-cancel {
+            padding: 8px 18px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #6b7280;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-modal-cancel:hover {
+            background: #f9fafb;
+        }
+        .btn-modal-save {
+            padding: 8px 18px;
+            border: 1.5px solid #3b82f6;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        .btn-modal-save:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+
+        /* ==================== Delete Confirm Dialog ==================== */
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .confirm-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .confirm-dialog {
+            width: 100%;
+            max-width: 360px;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .confirm-dialog .confirm-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #fef2f2;
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+        }
+        .confirm-dialog .confirm-text {
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+        .confirm-dialog .confirm-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .confirm-dialog .btn-confirm-cancel {
+            padding: 8px 20px;
+            border: 1.5px solid #e5e5e5;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #6b7280;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .confirm-dialog .btn-confirm-cancel:hover { background: #f9fafb; }
+        .confirm-dialog .btn-confirm-delete {
+            padding: 8px 20px;
+            border: 1.5px solid #ef4444;
+            border-radius: 8px;
+            background: #ef4444;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .confirm-dialog .btn-confirm-delete:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
         /* ==================== Responsive ==================== */
         @media (max-width: 640px) {
             body { padding: 16px 8px; }
@@ -717,9 +1150,14 @@
             .actions { flex-direction: column; align-items: stretch; }
             .actions-btns { justify-content: flex-end; }
             .room-header { padding: 12px 16px; }
+            .record-details {
+                grid-template-columns: 1fr;
+            }
+            .records-list { padding: 8px 12px; }
+            .records-header { padding: 14px 16px; }
+            .modal { max-width: 100%; }
         }
 
-        /* Mobile: sidebar becomes overlay */
         @media (max-width: 480px) {
             .sidebar {
                 position: absolute;
@@ -778,10 +1216,102 @@
                 </div>
             </aside>
 
-            <!-- 主区域：单房间展示 -->
+            <!-- 主区域 -->
             <main class="main-area" id="main-area">
-                <!-- 当前选中房间的面板由 JS 动态渲染 -->
+                <!-- 房间面板 + 记录列表由 JS 动态渲染 -->
             </main>
+        </div>
+    </div>
+
+    <!-- 记录编辑/新增弹窗 -->
+    <div class="modal-overlay" id="record-modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="record-modal-title">新增记录</span>
+                <button class="btn-modal-close" onclick="closeRecordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <label class="field-label">缴费日期</label>
+                    <input type="date" class="date-input" id="record-date">
+                </div>
+                <div class="form-row inline">
+                    <div>
+                        <label class="field-label">📅 抄表开始日期</label>
+                        <input type="date" class="date-input" id="record-meter-start">
+                    </div>
+                    <div>
+                        <label class="field-label">📅 抄表结束日期</label>
+                        <input type="date" class="date-input" id="record-meter-end">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="field-label">💧 水费信息</label>
+                </div>
+                <div class="form-row inline">
+                    <div>
+                        <label class="field-label">用水量（吨）</label>
+                        <input type="number" step="any" class="field-input" id="record-water-usage" placeholder="0" oninput="updateRecordModalCalc()">
+                    </div>
+                    <div>
+                        <label class="field-label">单价（元/吨）</label>
+                        <input type="number" step="any" class="field-input" id="record-water-price" placeholder="2.8" value="2.8" oninput="updateRecordModalCalc()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="field-label">⚡ 电费信息</label>
+                </div>
+                <div class="form-row inline">
+                    <div>
+                        <label class="field-label">用电量（度）</label>
+                        <input type="number" step="any" class="field-input" id="record-elec-usage" placeholder="0" oninput="updateRecordModalCalc()">
+                    </div>
+                    <div>
+                        <label class="field-label">单价（元/度）</label>
+                        <input type="number" step="any" class="field-input" id="record-elec-price" placeholder="0.55" value="0.55" oninput="updateRecordModalCalc()">
+                    </div>
+                </div>
+                <div class="form-row" style="padding:12px;background:#f0f9ff;border-radius:10px;">
+                    <div style="display:flex;justify-content:space-between;font-size:14px;">
+                        <span style="color:#6b7280;">水费合计：</span>
+                        <span style="font-weight:600;color:#0e7490;" id="record-water-cost">¥ 0</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:4px;">
+                        <span style="color:#6b7280;">电费合计：</span>
+                        <span style="font-weight:600;color:#c2410c;" id="record-elec-cost">¥ 0</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:16px;margin-top:6px;padding-top:6px;border-top:1px solid #bae6fd;">
+                        <span style="font-weight:600;color:#1f2937;">总费用：</span>
+                        <span style="font-weight:700;color:#3b82f6;" id="record-total-cost">¥ 0</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label class="field-label">备注</label>
+                    <textarea class="field-input" id="record-remark" placeholder="可选填写备注信息..."></textarea>
+                </div>
+                <input type="hidden" id="record-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal-cancel" onclick="closeRecordModal()">取消</button>
+                <button class="btn-modal-save" onclick="saveRecordFromModal()">保存记录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="confirm-overlay" id="confirm-overlay">
+        <div class="confirm-dialog">
+            <div class="confirm-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                </svg>
+            </div>
+            <div class="confirm-text" id="confirm-text">确定要删除这条记录吗？此操作不可撤销。</div>
+            <div class="confirm-btns">
+                <button class="btn-confirm-cancel" onclick="closeConfirmDialog()">取消</button>
+                <button class="btn-confirm-delete" id="btn-confirm-delete" onclick="confirmDeleteRecord()">确认删除</button>
+            </div>
         </div>
     </div>
 
@@ -793,7 +1323,6 @@
             water: { icon: '💧', label: '水费', meterLabel: '水表', unit: '吨', priceUnit: '元/吨', resultLabel: '应缴水费', usageLabel: '用水量', defaultPrice: '2.8' }
         };
 
-        // 房间头部颜色调色板（循环使用）
         const ROOM_COLORS = [
             { headerBg: 'linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)', badgeBg: '#6366f1' },
             { headerBg: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)', badgeBg: '#8b5cf6' },
@@ -805,16 +1334,19 @@
             { headerBg: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', badgeBg: '#22c55e' },
         ];
 
-        // 持久化键
         const ROOM_LIST_KEY = 'utility-bills-room-list';
         const ROOM_COUNTER_KEY = 'utility-bills-room-counter';
         const SELECTED_ROOM_KEY = 'utility-bills-selected-room';
         const SIDEBAR_COLLAPSED_KEY = 'utility-bills-sidebar-collapsed';
+        const RECORDS_PREFIX = 'utility-bills-records';
+        const PAGE_SIZE = 5;
 
-        // 动态房间状态
         let roomList = [];
         let roomCounter = 0;
         let selectedRoomId = null;
+        let currentRecordsPage = 1;
+        let pendingDeleteRecordId = null;
+        let pendingDeleteRoomId = null;
 
         // ==================== 存储键辅助函数 ====================
         function getStorageKey(prefix) {
@@ -823,19 +1355,27 @@
         function getRoomNameKey(roomId) {
             return `utility-bills-${roomId}-name`;
         }
+        function getRecordsKey(roomId) {
+            return `${RECORDS_PREFIX}-${roomId}`;
+        }
 
         // ==================== 工具函数 ====================
         function getToday() {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+            const d = new Date();
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
         }
 
         function formatNumber(num) {
             if (num === 0) return '0';
             return parseFloat(num.toPrecision(12)).toString();
+        }
+
+        function formatMoney(num) {
+            if (isNaN(num) || num === null) return '¥ 0';
+            return '¥ ' + formatNumber(num);
         }
 
         function formatTimestamp(isoString) {
@@ -845,8 +1385,7 @@
             const day = String(d.getDate()).padStart(2, '0');
             const h = String(d.getHours()).padStart(2, '0');
             const min = String(d.getMinutes()).padStart(2, '0');
-            const s = String(d.getSeconds()).padStart(2, '0');
-            return `${y}-${m}-${day} ${h}:${min}:${s}`;
+            return `${y}-${m}-${day} ${h}:${min}`;
         }
 
         function getRoomName(roomId) {
@@ -865,71 +1404,410 @@
             return ROOM_COLORS[idx % ROOM_COLORS.length];
         }
 
-        // ==================== 房间列表持久化 ====================
-        function loadRoomList() {
+        // ==================== 记录存储 ====================
+        function loadRecords(roomId) {
             try {
-                const saved = localStorage.getItem(ROOM_LIST_KEY);
-                if (saved) {
-                    const list = JSON.parse(saved);
-                    if (Array.isArray(list) && list.length > 0) {
-                        roomList = list;
-                        roomCounter = parseInt(localStorage.getItem(ROOM_COUNTER_KEY)) || 0;
-                        roomList.forEach(id => {
-                            const num = parseInt(id.replace('r', ''));
-                            if (num > roomCounter) roomCounter = num;
-                        });
-                        return;
-                    }
-                }
+                const data = localStorage.getItem(getRecordsKey(roomId));
+                return data ? JSON.parse(data) : [];
             } catch (e) {
-                console.error('加载房间列表失败:', e);
+                console.error('加载记录失败:', e);
+                return [];
             }
-            roomList = ['r1', 'r2'];
-            roomCounter = 2;
-            saveRoomList();
         }
 
-        function saveRoomList() {
-            localStorage.setItem(ROOM_LIST_KEY, JSON.stringify(roomList));
-            localStorage.setItem(ROOM_COUNTER_KEY, String(roomCounter));
+        function saveRecords(roomId, records) {
+            localStorage.setItem(getRecordsKey(roomId), JSON.stringify(records));
         }
 
-        // ==================== 选中房间持久化 ====================
-        function loadSelectedRoom() {
-            const saved = localStorage.getItem(SELECTED_ROOM_KEY);
-            if (saved && roomList.includes(saved)) {
-                selectedRoomId = saved;
+        function getRecordsFromPage(roomId, page) {
+            const records = loadRecords(roomId);
+            // 已按时间倒序排列（保存时插入到最前面）
+            const start = (page - 1) * PAGE_SIZE;
+            const pageRecords = records.slice(start, start + PAGE_SIZE);
+            return {
+                records: pageRecords,
+                total: records.length,
+                totalPages: Math.ceil(records.length / PAGE_SIZE) || 1
+            };
+        }
+
+        // ==================== 记录 UI 渲染 ====================
+        function renderRecords(roomId) {
+            const container = document.getElementById('records-container');
+            if (!container) return;
+
+            const { records, total, totalPages } = getRecordsFromPage(roomId, currentRecordsPage);
+
+            // 头部
+            let html = `
+            <div class="records-header">
+                <div class="records-title">
+                    <span>📋 缴费记录</span>
+                    <span class="records-count">共 ${total} 条</span>
+                </div>
+                <button class="btn-add-record" onclick="openRecordModal('${roomId}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    新增记录
+                </button>
+            </div>`;
+
+            // 列表
+            if (records.length === 0) {
+                html += `
+                <div class="records-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <p>暂无缴费记录</p>
+                    <p style="font-size:12px;margin-top:4px;">保存水电费数据后将自动在此生成记录</p>
+                </div>`;
             } else {
-                selectedRoomId = roomList[0];
+                html += '<div class="records-list">';
+                records.forEach(r => {
+                    const waterCost = r.waterCost || 0;
+                    const elecCost = r.elecCost || 0;
+                    const totalCost = waterCost + elecCost;
+                    // 抄表日期周期展示
+                    let meterPeriodHTML = '';
+                    if (r.meterDateStart || r.meterDateEnd) {
+                        const start = r.meterDateStart || '?';
+                        const end = r.meterDateEnd || '?';
+                        meterPeriodHTML = `<div class="record-detail-item record-meter-period">
+                            <span class="detail-label">📅 抄表周期：</span>
+                            <span class="detail-value">${start} ~ ${end}</span>
+                        </div>`;
+                    }
+                    html += `
+                    <div class="record-card">
+                        <div class="record-card-top">
+                            <span class="record-date">${r.date || '-'}</span>
+                            <span class="record-total">${formatMoney(totalCost)}</span>
+                        </div>
+                        ${meterPeriodHTML}
+                        <div class="record-details">
+                            <div class="record-detail-item">
+                                <span class="detail-label">💧 水费：</span>
+                                <span class="detail-value">${formatMoney(waterCost)}${r.waterUsage ? ` (${formatNumber(r.waterUsage)}吨 × ${formatMoney(r.waterUnitPrice)})` : ''}</span>
+                            </div>
+                            <div class="record-detail-item">
+                                <span class="detail-label">⚡ 电费：</span>
+                                <span class="detail-value">${formatMoney(elecCost)}${r.elecUsage ? ` (${formatNumber(r.elecUsage)}度 × ${formatMoney(r.elecUnitPrice)})` : ''}</span>
+                            </div>
+                        </div>`;
+                    if (r.remark) {
+                        html += `<div class="record-remark has-remark">${escapeHTML(r.remark)}</div>`;
+                    } else {
+                        html += '<div class="record-remark"></div>';
+                    }
+                    html += `
+                        <div class="record-card-bottom">
+                            <span class="saved-at">保存于 ${r.savedAt ? formatTimestamp(r.savedAt) : '-'}</span>
+                            <div class="record-card-actions">
+                                <button class="btn-record-action edit" onclick="openRecordModal('${roomId}', '${r.id}')">编辑</button>
+                                <button class="btn-record-action delete" onclick="showDeleteConfirm('${roomId}', '${r.id}')">删除</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
             }
-        }
 
-        function saveSelectedRoom() {
-            localStorage.setItem(SELECTED_ROOM_KEY, selectedRoomId);
-        }
+            // 分页
+            if (totalPages > 1) {
+                html += '<div class="records-pagination">';
+                html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', ${currentRecordsPage - 1})" ${currentRecordsPage <= 1 ? 'disabled' : ''}>&lt;</button>`;
 
-        // ==================== 侧边栏折叠状态 ====================
-        function loadSidebarState() {
-            const collapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
-            const sidebar = document.getElementById('sidebar');
-            const floatBtn = document.getElementById('btn-expand-floating');
-            if (collapsed) {
-                sidebar.classList.add('collapsed');
-                floatBtn.classList.add('visible');
+                const maxVisible = 5;
+                let startPage = Math.max(1, currentRecordsPage - Math.floor(maxVisible / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                if (endPage - startPage < maxVisible - 1) {
+                    startPage = Math.max(1, endPage - maxVisible + 1);
+                }
+
+                if (startPage > 1) {
+                    html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', 1)">1</button>`;
+                    if (startPage > 2) html += '<span class="pagination-info">...</span>';
+                }
+
+                for (let p = startPage; p <= endPage; p++) {
+                    html += `<button class="pagination-btn ${p === currentRecordsPage ? 'active' : ''}" onclick="changeRecordPage('${roomId}', ${p})">${p}</button>`;
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) html += '<span class="pagination-info">...</span>';
+                    html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', ${totalPages})">${totalPages}</button>`;
+                }
+
+                html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', ${currentRecordsPage + 1})" ${currentRecordsPage >= totalPages ? 'disabled' : ''}>&gt;</button>`;
+                html += '</div>';
             }
+
+            container.innerHTML = html;
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const floatBtn = document.getElementById('btn-expand-floating');
-            sidebar.classList.toggle('collapsed');
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            localStorage.setItem(SIDEBAR_COLLAPSED_KEY, isCollapsed);
-            floatBtn.classList.toggle('visible', isCollapsed);
+        function changeRecordPage(roomId, page) {
+            currentRecordsPage = page;
+            renderRecords(roomId);
+            // 滚动到记录列表区域
+            const section = document.querySelector('.records-section');
+            if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ==================== ID 生成 ====================
+        function generateRecordId() {
+            return 'rec_' + crypto.randomUUID();
+        }
+        function createRecordFromForm(roomId) {
+            // 从当前房间的两个 tab 收集数据
+            let waterUsage = null, waterPrice = null, waterCost = null;
+            let elecUsage = null, elecPrice = null, elecCost = null;
+
+            const waterUsageEl = document.getElementById(`${roomId}-water-input3`);
+            const waterPriceEl = document.getElementById(`${roomId}-water-input4`);
+            if (waterUsageEl && waterPriceEl) {
+                const usage = parseFloat(waterUsageEl.value);
+                const price = parseFloat(waterPriceEl.value);
+                if (!isNaN(usage) && !isNaN(price)) {
+                    waterUsage = usage;
+                    waterPrice = price;
+                    waterCost = usage * price;
+                }
+            }
+
+            const elecUsageEl = document.getElementById(`${roomId}-elec-input3`);
+            const elecPriceEl = document.getElementById(`${roomId}-elec-input4`);
+            if (elecUsageEl && elecPriceEl) {
+                const usage = parseFloat(elecUsageEl.value);
+                const price = parseFloat(elecPriceEl.value);
+                if (!isNaN(usage) && !isNaN(price)) {
+                    elecUsage = usage;
+                    elecPrice = price;
+                    elecCost = usage * price;
+                }
+            }
+
+            // 拿到记录日期（使用两个 tab 中较晚的日期）
+            let recordDate = getToday();
+            const waterDate2 = document.getElementById(`${roomId}-water-date2`);
+            const elecDate2 = document.getElementById(`${roomId}-elec-date2`);
+            if (elecDate2 && elecDate2.value) recordDate = elecDate2.value;
+            if (waterDate2 && waterDate2.value) recordDate = waterDate2.value;
+
+            // 收集抄表起止日期：取两个 tab 中最早的 date1 作为开始，最晚的 date2 作为结束
+            const waterDate1 = document.getElementById(`${roomId}-water-date1`);
+            const elecDate1 = document.getElementById(`${roomId}-elec-date1`);
+            const startCandidates = [
+                waterDate1 && waterDate1.value ? waterDate1.value : null,
+                elecDate1 && elecDate1.value ? elecDate1.value : null
+            ].filter(Boolean);
+            const endCandidates = [
+                waterDate2 && waterDate2.value ? waterDate2.value : null,
+                elecDate2 && elecDate2.value ? elecDate2.value : null
+            ].filter(Boolean);
+            const meterDateStart = startCandidates.length ? startCandidates.sort()[0] : null;
+            const meterDateEnd = endCandidates.length ? endCandidates.sort().reverse()[0] : null;
+
+            return {
+                id: generateRecordId(),
+                date: recordDate,
+                meterDateStart: meterDateStart,
+                meterDateEnd: meterDateEnd,
+                waterUsage: waterUsage,
+                waterUnitPrice: waterPrice,
+                waterCost: waterCost,
+                elecUsage: elecUsage,
+                elecUnitPrice: elecPrice,
+                elecCost: elecCost,
+                remark: '',
+                savedAt: new Date().toISOString(),
+                roomId: roomId
+            };
+        }
+
+        function addRecordToStorage(roomId, record) {
+            const records = loadRecords(roomId);
+            records.unshift(record); // 插入到最前面（倒序）
+            saveRecords(roomId, records);
+            currentRecordsPage = 1;
+            renderRecords(roomId);
+        }
+
+        // ==================== 弹窗管理 ====================
+        function openRecordModal(roomId, recordId) {
+            const overlay = document.getElementById('record-modal-overlay');
+            const title = document.getElementById('record-modal-title');
+            document.getElementById('record-id').value = recordId || '';
+            document.getElementById('record-date').value = getToday();
+            document.getElementById('record-water-usage').value = '';
+            document.getElementById('record-water-price').value = '2.8';
+            document.getElementById('record-elec-usage').value = '';
+            document.getElementById('record-elec-price').value = '0.55';
+            document.getElementById('record-remark').value = '';
+            document.getElementById('record-meter-start').value = '';
+            document.getElementById('record-meter-end').value = '';
+            document.getElementById('record-water-cost').textContent = '¥ 0';
+            document.getElementById('record-elec-cost').textContent = '¥ 0';
+            document.getElementById('record-total-cost').textContent = '¥ 0';
+
+            if (recordId) {
+                // 编辑模式：填充已有数据
+                title.textContent = '编辑记录';
+                const records = loadRecords(roomId);
+                const record = records.find(r => r.id === recordId);
+                if (record) {
+                    document.getElementById('record-date').value = record.date || getToday();
+                    document.getElementById('record-meter-start').value = record.meterDateStart || '';
+                    document.getElementById('record-meter-end').value = record.meterDateEnd || '';
+                    document.getElementById('record-water-usage').value = record.waterUsage || '';
+                    document.getElementById('record-water-price').value = record.waterUnitPrice != null ? record.waterUnitPrice : '2.8';
+                    document.getElementById('record-elec-usage').value = record.elecUsage || '';
+                    document.getElementById('record-elec-price').value = record.elecUnitPrice != null ? record.elecUnitPrice : '0.55';
+                    document.getElementById('record-remark').value = record.remark || '';
+                    updateRecordModalCalc();
+                }
+            } else {
+                title.textContent = '新增记录';
+            }
+
+            // 存储当前操作的房间 ID
+            overlay.dataset.roomId = roomId;
+            overlay.classList.add('open');
+        }
+
+        function closeRecordModal() {
+            document.getElementById('record-modal-overlay').classList.remove('open');
+        }
+
+        function updateRecordModalCalc() {
+            const wUsage = parseFloat(document.getElementById('record-water-usage').value) || 0;
+            const wPrice = parseFloat(document.getElementById('record-water-price').value) || 0;
+            const eUsage = parseFloat(document.getElementById('record-elec-usage').value) || 0;
+            const ePrice = parseFloat(document.getElementById('record-elec-price').value) || 0;
+
+            const wCost = wUsage * wPrice;
+            const eCost = eUsage * ePrice;
+            const total = wCost + eCost;
+
+            document.getElementById('record-water-cost').textContent = formatMoney(wCost);
+            document.getElementById('record-elec-cost').textContent = formatMoney(eCost);
+            document.getElementById('record-total-cost').textContent = formatMoney(total);
+        }
+
+        function saveRecordFromModal() {
+            const overlay = document.getElementById('record-modal-overlay');
+            const roomId = overlay.dataset.roomId;
+            if (!roomId) return;
+
+            const recordId = document.getElementById('record-id').value;
+            const date = document.getElementById('record-date').value || getToday();
+            const meterDateStart = document.getElementById('record-meter-start').value || null;
+            const meterDateEnd = document.getElementById('record-meter-end').value || null;
+            const wUsage = parseFloat(document.getElementById('record-water-usage').value) || null;
+            const wPrice = parseFloat(document.getElementById('record-water-price').value) || null;
+            const eUsage = parseFloat(document.getElementById('record-elec-usage').value) || null;
+            const ePrice = parseFloat(document.getElementById('record-elec-price').value) || null;
+            const remark = document.getElementById('record-remark').value.trim();
+
+            const record = {
+                id: recordId || generateRecordId(),
+                date: date,
+                meterDateStart: meterDateStart,
+                meterDateEnd: meterDateEnd,
+                waterUsage: wUsage,
+                waterUnitPrice: wPrice,
+                waterCost: wUsage != null && wPrice != null ? wUsage * wPrice : null,
+                elecUsage: eUsage,
+                elecUnitPrice: ePrice,
+                elecCost: eUsage != null && ePrice != null ? eUsage * ePrice : null,
+                remark: remark,
+                savedAt: new Date().toISOString(),
+                roomId: roomId
+            };
+
+            const records = loadRecords(roomId);
+
+            if (recordId) {
+                // 编辑模式
+                const idx = records.findIndex(r => r.id === recordId);
+                if (idx !== -1) {
+                    record.savedAt = records[idx].savedAt; // 保留原始保存时间
+                    records[idx] = record;
+                }
+            } else {
+                // 新增
+                records.unshift(record);
+            }
+
+            saveRecords(roomId, records);
+            currentRecordsPage = 1;
+            closeRecordModal();
+            renderRecords(roomId);
+
+            // 滚动到记录列表
+            const section = document.querySelector('.records-section');
+            if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ==================== 删除确认 ====================
+        function showDeleteConfirm(roomId, recordId) {
+            pendingDeleteRoomId = roomId;
+            pendingDeleteRecordId = recordId;
+            document.getElementById('confirm-overlay').classList.add('open');
+        }
+
+        function closeConfirmDialog() {
+            document.getElementById('confirm-overlay').classList.remove('open');
+            pendingDeleteRecordId = null;
+            pendingDeleteRoomId = null;
+        }
+
+        function confirmDeleteRecord() {
+            if (!pendingDeleteRecordId || !pendingDeleteRoomId) return;
+
+            // 先保存 roomId，因为 closeConfirmDialog() 会将其置为 null
+            const roomId = pendingDeleteRoomId;
+            const recordId = pendingDeleteRecordId;
+
+            const records = loadRecords(roomId);
+            const updated = records.filter(r => r.id !== recordId);
+            saveRecords(roomId, updated);
+
+            // 如果当前页没有记录了，回退一页
+            const { totalPages } = getRecordsFromPage(roomId, currentRecordsPage);
+            if (currentRecordsPage > totalPages) {
+                currentRecordsPage = Math.max(1, totalPages);
+            }
+
+            closeConfirmDialog();
+            renderRecords(roomId);
+        }
+
+        // 点击遮罩关闭弹窗（脚本在 body 末尾，DOM 已就绪，直接执行）
+        (function setupModalListeners() {
+            const modalOverlay = document.getElementById('record-modal-overlay');
+            const confirmOverlay = document.getElementById('confirm-overlay');
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === this) closeRecordModal();
+                });
+            }
+            if (confirmOverlay) {
+                confirmOverlay.addEventListener('click', function(e) {
+                    if (e.target === this) closeConfirmDialog();
+                });
+            }
+        });
 
         // ==================== HTML 生成 ====================
-        // 生成单个 Tab 内容（电费或水费）
         function createTabContent(prefix, tab) {
             const cfg = TAB_CONFIG[tab];
             return `
@@ -997,7 +1875,6 @@
             </div>`;
         }
 
-        // 生成整个房间面板（主区域用）
         function createRoomPanel(roomId) {
             const idx = getRoomIndex(roomId);
             const defaultName = `房间${idx + 1}`;
@@ -1039,7 +1916,6 @@
             </div>`;
         }
 
-        // 生成侧边栏房间列表项
         function createRoomListItem(roomId) {
             const idx = getRoomIndex(roomId);
             const name = getRoomName(roomId);
@@ -1072,7 +1948,9 @@
             if (!selectedRoomId || !roomList.includes(selectedRoomId)) {
                 selectedRoomId = roomList[0];
             }
-            mainEl.innerHTML = createRoomPanel(selectedRoomId);
+            currentRecordsPage = 1;
+            mainEl.innerHTML = createRoomPanel(selectedRoomId) +
+                '<div class="records-section" id="records-container"></div>';
             initRoomPanel(selectedRoomId);
         }
 
@@ -1086,16 +1964,14 @@
             if (roomId === selectedRoomId) return;
             selectedRoomId = roomId;
             saveSelectedRoom();
+            currentRecordsPage = 1;
 
-            // 更新侧边栏高亮
             document.querySelectorAll('.room-list-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.room === roomId);
             });
 
-            // 重新渲染主区域（干净切换，无残留）
             renderMainArea();
 
-            // 恢复数据提示
             let restored = false;
             TABS.forEach(tab => {
                 const prefix = `${roomId}-${tab}`;
@@ -1111,14 +1987,10 @@
             roomList.push(roomId);
             saveRoomList();
 
-            // 选中新增房间
             selectedRoomId = roomId;
             saveSelectedRoom();
-
-            // 重新渲染
             renderAll();
 
-            // 滚动侧边栏到新房间
             const newItem = document.querySelector(`.room-list-item[data-room="${roomId}"]`);
             if (newItem) newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -1130,27 +2002,23 @@
             const roomName = getRoomName(roomId);
             if (!confirm(`确定要删除「${roomName}」吗？该房间的所有数据将被清除。`)) return;
 
-            // 清除该房间的所有 localStorage 数据
             TABS.forEach(tab => {
                 localStorage.removeItem(getStorageKey(`${roomId}-${tab}`));
             });
             localStorage.removeItem(getRoomNameKey(roomId));
+            localStorage.removeItem(getRecordsKey(roomId));
 
-            // 从房间列表移除
             roomList = roomList.filter(id => id !== roomId);
             saveRoomList();
 
-            // 如果删除的是当前选中的房间，切换到第一个
             if (selectedRoomId === roomId) {
                 selectedRoomId = roomList[0];
                 saveSelectedRoom();
             }
 
-            // 重新渲染
             renderAll();
         }
 
-        // 更新删除按钮的禁用状态
         function updateDeleteButtonStates() {
             const disabled = roomList.length <= 1;
             document.querySelectorAll('.room-list-delete').forEach(btn => {
@@ -1274,8 +2142,17 @@
         }
 
         function manualSave(prefix) {
+            // 保存当前 tab 数据到 localStorage
             saveToStorage(prefix);
             updateSaveTimeDisplay(prefix);
+
+            // 提取 roomId 并自动生成记录
+            const roomId = prefix.split('-').slice(0, -1).join('-');
+            const record = createRecordFromForm(roomId);
+            // 只在有水费或电费数据时才添加记录
+            if (record.waterCost != null || record.elecCost != null) {
+                addRecordToStorage(roomId, record);
+            }
         }
 
         function showRestoreToast() {
@@ -1323,7 +2200,6 @@
                 if (!name) name = nameEl.dataset.default;
                 nameEl.textContent = name;
                 localStorage.setItem(getRoomNameKey(roomId), name);
-                // 同步更新侧边栏名称
                 updateSidebarRoomName(roomId, name);
             });
 
@@ -1361,6 +2237,11 @@
                 resetForm(prefix);
                 updateSaveTimeDisplay(prefix);
             });
+
+            // 也清除记录
+            localStorage.removeItem(getRecordsKey(roomId));
+            currentRecordsPage = 1;
+            renderRecords(roomId);
         }
 
         function resetForm(prefix) {
@@ -1394,6 +2275,67 @@
             updateResult(prefix);
         }
 
+        // ==================== 房间列表持久化 ====================
+        function loadRoomList() {
+            try {
+                const saved = localStorage.getItem(ROOM_LIST_KEY);
+                if (saved) {
+                    const list = JSON.parse(saved);
+                    if (Array.isArray(list) && list.length > 0) {
+                        roomList = list;
+                        roomCounter = parseInt(localStorage.getItem(ROOM_COUNTER_KEY)) || 0;
+                        roomList.forEach(id => {
+                            const num = parseInt(id.replace('r', ''));
+                            if (num > roomCounter) roomCounter = num;
+                        });
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('加载房间列表失败:', e);
+            }
+            roomList = ['r1', 'r2'];
+            roomCounter = 2;
+            saveRoomList();
+        }
+
+        function saveRoomList() {
+            localStorage.setItem(ROOM_LIST_KEY, JSON.stringify(roomList));
+            localStorage.setItem(ROOM_COUNTER_KEY, String(roomCounter));
+        }
+
+        function loadSelectedRoom() {
+            const saved = localStorage.getItem(SELECTED_ROOM_KEY);
+            if (saved && roomList.includes(saved)) {
+                selectedRoomId = saved;
+            } else {
+                selectedRoomId = roomList[0];
+            }
+        }
+
+        function saveSelectedRoom() {
+            localStorage.setItem(SELECTED_ROOM_KEY, selectedRoomId);
+        }
+
+        function loadSidebarState() {
+            const collapsed = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+            const sidebar = document.getElementById('sidebar');
+            const floatBtn = document.getElementById('btn-expand-floating');
+            if (collapsed) {
+                sidebar.classList.add('collapsed');
+                floatBtn.classList.add('visible');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const floatBtn = document.getElementById('btn-expand-floating');
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem(SIDEBAR_COLLAPSED_KEY, isCollapsed);
+            floatBtn.classList.toggle('visible', isCollapsed);
+        }
+
         // ==================== 初始化单个房间面板 ====================
         function initRoomPanel(roomId) {
             loadRoomName(roomId);
@@ -1417,6 +2359,9 @@
                 updateResult(prefix);
             });
 
+            // 渲染记录列表
+            renderRecords(roomId);
+
             return restored;
         }
 
@@ -1427,7 +2372,6 @@
             loadSidebarState();
             renderAll();
 
-            // 检查是否有恢复的数据
             let anyRestored = false;
             TABS.forEach(tab => {
                 const prefix = `${selectedRoomId}-${tab}`;
