@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>访问统计仪表盘 - 水电费计算器</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+        /* 顶部栏 */
+        .topbar {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #fff;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 12px rgba(99, 102, 241, 0.2);
+        }
+        .topbar h1 { font-size: 20px; font-weight: 700; }
+        .topbar .controls { display: flex; gap: 10px; align-items: center; }
+        .topbar select, .topbar button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .topbar select { background: #fff; color: #1f2937; }
+        .topbar button.refresh {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            transition: background 0.2s;
+        }
+        .topbar button.refresh:hover { background: rgba(255,255,255,0.35); }
+
+        /* 登录遮罩 */
+        .login-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999;
+        }
+        .login-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px;
+            width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+        .login-box h2 { font-size: 18px; margin-bottom: 20px; text-align: center; }
+        .login-box input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .login-box input:focus { outline: none; border-color: #6366f1; }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .login-box button:hover { opacity: 0.9; }
+        .login-box .login-error {
+            color: #ef4444;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 12px;
+            min-height: 18px;
+        }
+        .login-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* 主体 */
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+
+        /* 指标卡片 */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+        .card .label { font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+        .card .value { font-size: 32px; font-weight: 800; color: #1f2937; }
+        .card .sub { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+        .card.highlight .value { color: #6366f1; }
+        .card.green .value { color: #10b981; }
+        .card.orange .value { color: #f59e0b; }
+
+        /* 图表区域 */
+        .chart-section {
+            background: #fff;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+        }
+        .chart-section h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .chart-section h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: #6366f1;
+            border-radius: 2px;
+        }
+
+        /* 柱状图 */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 200px;
+            overflow-x: auto;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .bar-group {
+            flex: 1;
+            min-width: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            position: relative;
+        }
+        .bar {
+            width: 60%;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+            min-height: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+        .bar.pv { background: linear-gradient(180deg, #818cf8, #6366f1); }
+        .bar.uv { background: linear-gradient(180deg, #34d399, #10b981); width: 35%; }
+        .bar-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: #fff;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            margin-bottom: 4px;
+        }
+        .bar-group:hover .bar-tooltip { opacity: 1; }
+        .bar-label {
+            font-size: 10px;
+            color: #9ca3af;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        /* 分布列表 */
+        .dist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+        .dist-list { list-style: none; }
+        .dist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f3f4f6;
+            gap: 12px;
+        }
+        .dist-item:last-child { border-bottom: none; }
+        .dist-name { width: 100px; font-size: 13px; font-weight: 500; color: #374151; }
+        .dist-bar-wrap {
+            flex: 1;
+            height: 20px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .dist-bar {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #818cf8, #6366f1);
+            transition: width 0.5s ease;
+            min-width: 2px;
+        }
+        .dist-count { font-size: 13px; font-weight: 600; color: #6b7280; width: 80px; text-align: right; }
+
+        /* 表格 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #6b7280;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+        }
+        tr:hover td { background: #f9fafb; }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .tag.mobile { background: #dbeafe; color: #1e40af; }
+        .tag.desktop { background: #dcfce7; color: #166534; }
+        .tag.tablet { background: #fef3c7; color: #92400e; }
+
+        /* 空状态 */
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        /* 加载中 */
+        .loading {
+            text-align: center;
+            padding: 80px;
+            color: #9ca3af;
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 640px) {
+            .topbar { flex-direction: column; gap: 12px; align-items: flex-start; }
+            .card .value { font-size: 24px; }
+            .dist-name { width: 70px; }
+            table { font-size: 12px; }
+            th, td { padding: 8px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录 -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>访问统计登录</h2>
+            <input type="password" id="tokenInput" placeholder="输入访问 Token" autofocus>
+            <div class="login-error" id="loginError"></div>
+            <button id="loginBtn" onclick="doLogin()">登录</button>
+        </div>
+    </div>
+
+    <!-- 顶部栏 -->
+    <div class="topbar">
+        <h1>水电费计算器 · 访问统计</h1>
+        <div class="controls">
+            <select id="daysSelect" onchange="loadStats()">
+                <option value="7">最近 7 天</option>
+                <option value="30">最近 30 天</option>
+                <option value="90">最近 90 天</option>
+                <option value="365">最近一年</option>
+            </select>
+            <button class="refresh" onclick="loadStats()">刷新</button>
+            <button class="refresh" onclick="doLogout()" title="退出登录">退出</button>
+        </div>
+    </div>
+
+    <!-- 主体 -->
+    <div class="container" id="mainContent" style="display:none;">
+        <!-- 指标卡片 -->
+        <div class="cards">
+            <div class="card highlight">
+                <div class="label">今日 PV</div>
+                <div class="value" id="todayPV">0</div>
+                <div class="sub" id="todayPVSub">页面浏览量</div>
+            </div>
+            <div class="card highlight">
+                <div class="label">今日 UV</div>
+                <div class="value" id="todayUV">0</div>
+                <div class="sub" id="todayUVSub">独立访客</div>
+            </div>
+            <div class="card green">
+                <div class="label">总 PV</div>
+                <div class="value" id="totalPV">0</div>
+                <div class="sub" id="totalPVSub">累计页面浏览</div>
+            </div>
+            <div class="card green">
+                <div class="label">总 UV</div>
+                <div class="value" id="totalUV">0</div>
+                <div class="sub" id="totalUVSub">累计独立访客</div>
+            </div>
+            <div class="card orange">
+                <div class="label">平均停留</div>
+                <div class="value" id="avgDwell">0s</div>
+                <div class="sub" id="avgDwellSub">用户停留时间</div>
+            </div>
+        </div>
+
+        <!-- 每日趋势 -->
+        <div class="chart-section">
+            <h3>每日访问趋势 (PV / UV)</h3>
+            <div class="bar-chart" id="dailyChart"></div>
+        </div>
+
+        <!-- 分布数据 -->
+        <div class="chart-section">
+            <h3>访客分析</h3>
+            <div class="dist-grid">
+                <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:#6b7280;">来源分布</div>
+                    <ul class="dist-list" id="sourceList"></ul>
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:#6b7280;">设备分布</div>
+                    <ul class="dist-list" id="deviceList"></ul>
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:#6b7280;">浏览器分布</div>
+                    <ul class="dist-list" id="browserList"></ul>
+                </div>
+                <div>
+                    <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:#6b7280;">操作系统分布</div>
+                    <ul class="dist-list" id="osList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 最近访问 -->
+        <div class="chart-section">
+            <h3>最近访问记录 (最新 50 条)</h3>
+            <div style="overflow-x:auto;">
+                <table id="recentTable">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>事件</th>
+                            <th>来源</th>
+                            <th>设备</th>
+                            <th>浏览器</th>
+                            <th>系统</th>
+                            <th>分辨率</th>
+                            <th>停留</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loadingMsg" style="display:none;">加载中</div>
+
+    <script>
+        var API_BASE = '';
+        var token = localStorage.getItem('stats_token') || '';
+        var currentData = null;
+
+        // 自动登录：先验证 token，验证通过才显示仪表盘
+        if (token) {
+            verifyToken(token, function(ok) {
+                if (ok) {
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    loadStats();
+                } else {
+                    // token 失效，清空并显示登录页
+                    token = '';
+                    localStorage.removeItem('stats_token');
+                    showLogin('登录已过期，请重新输入 Token');
+                }
+            });
+        }
+
+        function verifyToken(t, callback) {
+            fetch(API_BASE + '/api/stats?days=1', {
+                headers: { 'Authorization': 'Bearer ' + t }
+            })
+                .then(function(r) { callback(r.status === 200); })
+                .catch(function() { callback(false); });
+        }
+
+        function doLogin() {
+            var t = document.getElementById('tokenInput').value.trim();
+            var errEl = document.getElementById('loginError');
+            var btn = document.getElementById('loginBtn');
+            if (!t) { errEl.textContent = '请输入 Token'; return; }
+
+            btn.disabled = true;
+            btn.textContent = '验证中...';
+            errEl.textContent = '';
+
+            verifyToken(t, function(ok) {
+                btn.disabled = false;
+                btn.textContent = '登录';
+                if (ok) {
+                    token = t;
+                    localStorage.setItem('stats_token', t);
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    loadStats();
+                } else {
+                    showLogin('Token 无效，请检查后重新输入');
+                    document.getElementById('tokenInput').value = '';
+                    document.getElementById('tokenInput').focus();
+                }
+            });
+        }
+
+        function doLogout() {
+            token = '';
+            localStorage.removeItem('stats_token');
+            document.getElementById('mainContent').style.display = 'none';
+            showLogin('');
+            document.getElementById('tokenInput').value = '';
+            document.getElementById('tokenInput').focus();
+        }
+
+        function showLogin(msg) {
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('loginError').textContent = msg || '';
+        }
+
+        document.getElementById('tokenInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        function loadStats() {
+            var days = document.getElementById('daysSelect').value;
+            var loading = document.getElementById('loadingMsg');
+            loading.style.display = 'block';
+
+            fetch(API_BASE + '/api/stats?days=' + days, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+                .then(function(r) {
+                    if (r.status === 401) {
+                        // token 失效，退回登录页
+                        token = '';
+                        localStorage.removeItem('stats_token');
+                        document.getElementById('mainContent').style.display = 'none';
+                        showLogin('登录已过期，请重新输入 Token');
+                        throw new Error('unauthorized');
+                    }
+                    return r.json();
+                })
+                .then(function(data) {
+                    loading.style.display = 'none';
+                    if (data.error) {
+                        alert('Error: ' + data.error);
+                        return;
+                    }
+                    currentData = data;
+                    renderStats(data);
+                })
+                .catch(function(e) {
+                    if (e.message !== 'unauthorized') {
+                        loading.innerHTML = '加载失败: ' + e.message + ' <button onclick="loadStats()" style="margin-left:10px;padding:4px 12px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;">重试</button>';
+                    }
+                });
+        }
+
+        function renderStats(d) {
+            // 指标卡片
+            document.getElementById('todayPV').textContent = d.today.pv.toLocaleString();
+            document.getElementById('todayUV').textContent = d.today.uv.toLocaleString();
+            document.getElementById('totalPV').textContent = d.total.pv.toLocaleString();
+            document.getElementById('totalUV').textContent = d.total.uv.toLocaleString();
+            document.getElementById('avgDwell').textContent = formatDwell(d.avgDwellTime);
+
+            // 每日趋势
+            renderDailyChart(d.dailyTrend);
+
+            // 分布
+            renderDist('sourceList', d.sources);
+            renderDist('deviceList', d.devices, 'tagDevice');
+            renderDist('browserList', d.browsers);
+            renderDist('osList', d.oses);
+
+            // 最近记录
+            renderRecent(d.recent);
+        }
+
+        function formatDwell(ms) {
+            if (!ms || ms < 1000) return '0s';
+            var s = Math.round(ms / 1000);
+            if (s < 60) return s + 's';
+            var m = Math.floor(s / 60);
+            var rs = s % 60;
+            return m + 'm ' + rs + 's';
+        }
+
+        function renderDailyChart(trend) {
+            var chart = document.getElementById('dailyChart');
+            if (!trend || trend.length === 0) {
+                chart.innerHTML = '<div class="empty">暂无数据</div>';
+                return;
+            }
+            var maxPV = Math.max.apply(null, trend.map(function(t) { return t.pv; }));
+            maxPV = maxPV || 1;
+            var html = '';
+            trend.forEach(function(t) {
+                var pvH = (t.pv / maxPV * 160);
+                var uvH = (t.uv / maxPV * 160);
+                var date = t.date.slice(5); // MM-DD
+                html += '<div class="bar-group">' +
+                    '<div class="bar-tooltip">PV: ' + t.pv + ' / UV: ' + t.uv + ' (' + t.date + ')</div>' +
+                    '<div style="display:flex;gap:2px;align-items:flex-end;height:160px;">' +
+                        '<div class="bar pv" style="height:' + pvH + 'px;"></div>' +
+                        '<div class="bar uv" style="height:' + uvH + 'px;"></div>' +
+                    '</div>' +
+                    '<div class="bar-label">' + date + '</div>' +
+                '</div>';
+            });
+            chart.innerHTML = html;
+        }
+
+        function renderDist(id, items, tagType) {
+            var el = document.getElementById(id);
+            if (!items || items.length === 0) {
+                el.innerHTML = '<li class="empty">暂无数据</li>';
+                return;
+            }
+            var total = items.reduce(function(s, i) { return s + i.pv; }, 0);
+            var html = '';
+            items.forEach(function(item) {
+                var pct = total > 0 ? (item.pv / total * 100) : 0;
+                var name = item.source || item.device || item.browser || item.os || 'unknown';
+                if (tagType === 'tagDevice') name = '<span class="tag ' + name + '">' + name + '</span>';
+                html += '<li class="dist-item">' +
+                    '<span class="dist-name">' + name + '</span>' +
+                    '<div class="dist-bar-wrap"><div class="dist-bar" style="width:' + pct + '%;"></div></div>' +
+                    '<span class="dist-count">' + item.pv + ' (' + pct.toFixed(1) + '%)</span>' +
+                '</li>';
+            });
+            el.innerHTML = html;
+        }
+
+        function renderRecent(rows) {
+            var tb = document.getElementById('recentBody');
+            if (!rows || rows.length === 0) {
+                tb.innerHTML = '<tr><td colspan="8" class="empty">暂无访问记录</td></tr>';
+                return;
+            }
+            var eventMap = { pageview: '访问', dwell: '离开', heartbeat: '心跳' };
+            var html = '';
+            rows.forEach(function(r) {
+                html += '<tr>' +
+                    '<td style="white-space:nowrap;">' + r.timeStr + '</td>' +
+                    '<td>' + (eventMap[r.event] || r.event) + '</td>' +
+                    '<td>' + (r.source || '-') + '</td>' +
+                    '<td><span class="tag ' + (r.device || '') + '">' + (r.device || '-') + '</span></td>' +
+                    '<td>' + (r.browser || '-') + '</td>' +
+                    '<td>' + (r.os || '-') + '</td>' +
+                    '<td>' + (r.screen || '-') + '</td>' +
+                    '<td>' + (r.dwellSeconds > 0 ? r.dwellSeconds + 's' : '-') + '</td>' +
+                '</tr>';
+            });
+            tb.innerHTML = html;
+        }
+
+        // 每 60 秒自动刷新
+        setInterval(function() {
+            if (token && document.visibilityState === 'visible') loadStats();
+        }, 60000);
+    </script>
+</body>
+</html>

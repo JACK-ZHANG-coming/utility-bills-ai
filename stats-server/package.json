@@ -1,0 +1,13 @@
+{
+  "name": "utility-bills-stats",
+  "version": "1.0.0",
+  "description": "轻量自建访问统计服务 for 水电费计算器",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3"
+  }
+}

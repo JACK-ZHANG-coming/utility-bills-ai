@@ -1,0 +1,33 @@
+# ===== 敏感文件（含 token / 密码 / 数据）=====
+# 统计服务配置文件（包含 ACCESS_TOKEN，不可公开）
+stats-server/analytics.service
+# SQLite 数据库（含访客数据）
+stats-server/analytics.db
+stats-server/analytics.db-shm
+stats-server/analytics.db-wal
+stats-server/*.db
+stats-server/*.db-*
+
+# ===== 依赖 =====
+stats-server/node_modules/
+node_modules/
+
+# ===== 环境变量 =====
+.env
+.env.*
+!.env.example
+
+# ===== 系统/编辑器 =====
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# ===== 构建产物 =====
+*.log
+
+# ===== AI 工作区 =====
+.workbuddy/memory/

@@ -2907,5 +2907,156 @@
             }
         });
     </script>
+
+    <!-- ==================== 访问统计埋点 ==================== -->
+    <script>
+    (function() {
+        'use strict';
+        // 统计 API 地址（同域，由 Nginx 反代到后端服务）
+        var TRACK_API = '/api/track';
+        // 会话标识（30 分钟内同一 visitor 算一个 session）
+        var SESSION_TIMEOUT = 30 * 60 * 1000;
+
+        // ---------- 工具函数 ----------
+        function getCookie(name) {
+            var m = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+        function setCookie(name, value, maxAge) {
+            document.cookie = name + '=' + encodeURIComponent(value) +
+                ';path=/;max-age=' + maxAge +
+                ';SameSite=Lax' +
+                (location.protocol === 'https:' ? ';Secure' : '');
+        }
+        // 生成或读取 visitor ID（持久 2 年）
+        function getVisitorId() {
+            var vid = getCookie('vid');
+            if (!vid) {
+                vid = 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+                setCookie('vid', vid, 63072000); // 2 年
+            }
+            return vid;
+        }
+        // 生成或续期 session ID（30 分钟过期）
+        function getSessionId() {
+            var sid = getCookie('sid');
+            setCookie('sid', sid || ('s_' + Date.now().toString(36)), SESSION_TIMEOUT / 1000);
+            return getCookie('sid');
+        }
+        // 解析来源
+        function parseReferrer() {
+            var ref = document.referrer || '';
+            if (!ref) return { source: 'direct', referrer: '' };
+            try {
+                var u = new URL(ref);
+                var host = u.hostname.replace(/^www\./, '');
+                var map = {
+                    'baidu.com': '百度', 'google.com': 'Google', 'google.com.hk': 'Google',
+                    'bing.com': 'Bing', 'sogou.com': '搜狗', 'so.com': '360搜索',
+                    'sm.cn': '神马搜索', 'yahoo.com': 'Yahoo',
+                    'weibo.com': '微博', 'mp.weixin.qq.com': '微信', 'zhihu.com': '知乎',
+                    'github.com': 'GitHub', 'twitter.com': 'Twitter', 'x.com': 'X',
+                    'facebook.com': 'Facebook', 'qq.com': 'QQ', 'douyin.com': '抖音'
+                };
+                for (var k in map) {
+                    if (host.indexOf(k) >= 0) return { source: map[k], referrer: ref };
+                }
+                return { source: host, referrer: ref };
+            } catch(e) {
+                return { source: 'direct', referrer: ref };
+            }
+        }
+        // 设备类型
+        function getDevice() {
+            var ua = navigator.userAgent;
+            if (/Mobile|Android|iPhone|iPod|Windows Phone/i.test(ua)) return 'mobile';
+            if (/iPad|Tablet/i.test(ua)) return 'tablet';
+            return 'desktop';
+        }
+        // 浏览器
+        function getBrowser() {
+            var ua = navigator.userAgent;
+            if (/Edg\//i.test(ua)) return 'Edge';
+            if (/Chrome/i.test(ua)) return 'Chrome';
+            if (/Firefox/i.test(ua)) return 'Firefox';
+            if (/Safari/i.test(ua)) return 'Safari';
+            if (/MSIE|Trident/i.test(ua)) return 'IE';
+            return 'Other';
+        }
+        // 操作系统
+        function getOS() {
+            var ua = navigator.userAgent;
+            if (/Windows/i.test(ua)) return 'Windows';
+            if (/Mac OS/i.test(ua) && !/iPhone|iPad|iPod/i.test(ua)) return 'macOS';
+            if (/Android/i.test(ua)) return 'Android';
+            if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+            if (/Linux/i.test(ua)) return 'Linux';
+            return 'Other';
+        }
+
+        // ---------- 发送数据 ----------
+        function sendTrack(data) {
+            data.vid = getVisitorId();
+            data.sid = getSessionId();
+            data.url = location.href;
+            data.path = location.pathname;
+            data.title = document.title;
+            data.timestamp = Date.now();
+            data.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Shanghai';
+
+            var ref = parseReferrer();
+            data.referrer = ref.referrer;
+            data.source = ref.source;
+            data.device = getDevice();
+            data.browser = getBrowser();
+            data.os = getOS();
+            data.screen = screen.width + 'x' + screen.height;
+            data.lang = navigator.language || 'zh-CN';
+
+            var json = JSON.stringify(data);
+            // 优先用 sendBeacon（不阻塞页面关闭）
+            if (navigator.sendBeacon) {
+                var blob = new Blob([json], { type: 'application/json' });
+                if (navigator.sendBeacon(TRACK_API, blob)) return;
+            }
+            // 降级 fetch
+            try {
+                fetch(TRACK_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: json,
+                    keepalive: true
+                }).catch(function(){});
+            } catch(e) {}
+        }
+
+        // ---------- 页面访问埋点 ----------
+        var pageEnterTime = Date.now();
+        var dwellSent = false;
+
+        // 1. 页面加载时发送 pageview
+        sendTrack({ event: 'pageview' });
+
+        // 2. 页面关闭/隐藏时发送停留时间
+        function sendDwell() {
+            if (dwellSent) return;
+            dwellSent = true;
+            sendTrack({ event: 'dwell', dwellTime: Date.now() - pageEnterTime });
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') sendDwell();
+        });
+        window.addEventListener('pagehide', sendDwell);
+        window.addEventListener('beforeunload', sendDwell);
+
+        // 3. 每 30 秒发送一次心跳（用于统计真实停留时长）
+        setInterval(function() {
+            if (document.visibilityState === 'visible') {
+                sendTrack({ event: 'heartbeat', dwellTime: Date.now() - pageEnterTime });
+            }
+        }, 30000);
+    })();
+    </script>
 </body>
 </html>

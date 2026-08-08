@@ -1,0 +1,18 @@
+[Unit]
+Description=Utility Bills Analytics Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/aitools/stats-server
+ExecStart=/usr/bin/node /var/www/aitools/stats-server/server.js
+Restart=always
+RestartSec=5
+# ⚠️ 请将下面的 TOKEN 替换为你自己生成的随机值
+# 生成命令: node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"
+Environment=ACCESS_TOKEN=CHANGE_ME_TO_RANDOM_TOKEN
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
