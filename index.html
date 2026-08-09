@@ -1963,61 +1963,74 @@
         function generateRecordId() {
             return 'rec_' + crypto.randomUUID();
         }
-        function createRecordFromForm(roomId) {
-            // 从当前房间的两个 tab 收集数据
+        function createRecordFromForm(roomId, onlyTab) {
+            // 从当前房间收集数据，onlyTab 为 'water' 或 'elec' 时只收集对应 tab 的数据
             let waterUsage = null, waterPrice = null, waterCost = null;
             let elecUsage = null, elecPrice = null, elecCost = null;
 
-            const waterUsageEl = document.getElementById(`${roomId}-water-input3`);
-            const waterPriceEl = document.getElementById(`${roomId}-water-input4`);
-            if (waterUsageEl && waterPriceEl) {
-                const usage = parseFloat(waterUsageEl.value);
-                const price = parseFloat(waterPriceEl.value);
-                if (!isNaN(usage) && !isNaN(price)) {
-                    waterUsage = usage;
-                    waterPrice = price;
-                    waterCost = usage * price;
+            if (!onlyTab || onlyTab === 'water') {
+                const waterUsageEl = document.getElementById(`${roomId}-water-input3`);
+                const waterPriceEl = document.getElementById(`${roomId}-water-input4`);
+                if (waterUsageEl && waterPriceEl) {
+                    const usage = parseFloat(waterUsageEl.value);
+                    const price = parseFloat(waterPriceEl.value);
+                    if (!isNaN(usage) && !isNaN(price)) {
+                        waterUsage = usage;
+                        waterPrice = price;
+                        waterCost = usage * price;
+                    }
                 }
             }
 
-            const elecUsageEl = document.getElementById(`${roomId}-elec-input3`);
-            const elecPriceEl = document.getElementById(`${roomId}-elec-input4`);
-            if (elecUsageEl && elecPriceEl) {
-                const usage = parseFloat(elecUsageEl.value);
-                const price = parseFloat(elecPriceEl.value);
-                if (!isNaN(usage) && !isNaN(price)) {
-                    elecUsage = usage;
-                    elecPrice = price;
-                    elecCost = usage * price;
+            if (!onlyTab || onlyTab === 'elec') {
+                const elecUsageEl = document.getElementById(`${roomId}-elec-input3`);
+                const elecPriceEl = document.getElementById(`${roomId}-elec-input4`);
+                if (elecUsageEl && elecPriceEl) {
+                    const usage = parseFloat(elecUsageEl.value);
+                    const price = parseFloat(elecPriceEl.value);
+                    if (!isNaN(usage) && !isNaN(price)) {
+                        elecUsage = usage;
+                        elecPrice = price;
+                        elecCost = usage * price;
+                    }
                 }
             }
 
-            // 拿到记录日期（使用两个 tab 中较晚的日期）
+            // 拿到记录日期（使用只涉及对应 tab 或两个 tab 中较晚的日期）
             let recordDate = getToday();
             const waterDate2 = document.getElementById(`${roomId}-water-date2`);
             const elecDate2 = document.getElementById(`${roomId}-elec-date2`);
-            if (elecDate2 && elecDate2.value) recordDate = elecDate2.value;
-            if (waterDate2 && waterDate2.value) recordDate = waterDate2.value;
+            if (!onlyTab || onlyTab === 'elec') {
+                if (elecDate2 && elecDate2.value) recordDate = elecDate2.value;
+            }
+            if (!onlyTab || onlyTab === 'water') {
+                if (waterDate2 && waterDate2.value) recordDate = waterDate2.value;
+            }
 
-            // 收集抄表起止日期：取两个 tab 中最早的 date1 作为开始，最晚的 date2 作为结束
+            // 收集抄表起止日期
             const waterDate1 = document.getElementById(`${roomId}-water-date1`);
             const elecDate1 = document.getElementById(`${roomId}-elec-date1`);
-            const startCandidates = [
-                waterDate1 && waterDate1.value ? waterDate1.value : null,
-                elecDate1 && elecDate1.value ? elecDate1.value : null
-            ].filter(Boolean);
-            const endCandidates = [
-                waterDate2 && waterDate2.value ? waterDate2.value : null,
-                elecDate2 && elecDate2.value ? elecDate2.value : null
-            ].filter(Boolean);
+            const startCandidates = [];
+            const endCandidates = [];
+            if (!onlyTab || onlyTab === 'water') {
+                if (waterDate1 && waterDate1.value) startCandidates.push(waterDate1.value);
+                if (waterDate2 && waterDate2.value) endCandidates.push(waterDate2.value);
+            }
+            if (!onlyTab || onlyTab === 'elec') {
+                if (elecDate1 && elecDate1.value) startCandidates.push(elecDate1.value);
+                if (elecDate2 && elecDate2.value) endCandidates.push(elecDate2.value);
+            }
             const meterDateStart = startCandidates.length ? startCandidates.sort()[0] : null;
             const meterDateEnd = endCandidates.length ? endCandidates.sort().reverse()[0] : null;
 
             // 收集电费上期/本期度数（用于记录展示）
-            const elecInput1 = document.getElementById(`${roomId}-elec-input1`);
-            const elecInput2 = document.getElementById(`${roomId}-elec-input2`);
-            const elecReadingStart = elecInput1 && elecInput1.value ? parseFloat(elecInput1.value) : null;
-            const elecReadingEnd = elecInput2 && elecInput2.value ? parseFloat(elecInput2.value) : null;
+            let elecReadingStart = null, elecReadingEnd = null;
+            if (!onlyTab || onlyTab === 'elec') {
+                const elecInput1 = document.getElementById(`${roomId}-elec-input1`);
+                const elecInput2 = document.getElementById(`${roomId}-elec-input2`);
+                elecReadingStart = elecInput1 && elecInput1.value ? parseFloat(elecInput1.value) : null;
+                elecReadingEnd = elecInput2 && elecInput2.value ? parseFloat(elecInput2.value) : null;
+            }
 
             return {
                 id: generateRecordId(),
@@ -2559,10 +2572,12 @@
             saveToStorage(prefix);
             updateSaveTimeDisplay(prefix);
 
-            // 提取 roomId 并自动生成记录
-            const roomId = prefix.split('-').slice(0, -1).join('-');
-            const record = createRecordFromForm(roomId);
-            // 只在有水费或电费数据时才添加记录
+            // 提取 roomId 和 tab 类型，只收集当前 tab 的数据
+            const parts = prefix.split('-');
+            const tab = parts[parts.length - 1]; // 'water' 或 'elec'
+            const roomId = parts.slice(0, -1).join('-');
+            const record = createRecordFromForm(roomId, tab);
+            // 只在有数据时才添加记录
             if (record.waterCost != null || record.elecCost != null) {
                 addRecordToStorage(roomId, record);
             }
