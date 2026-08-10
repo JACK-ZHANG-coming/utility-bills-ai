@@ -1050,13 +1050,75 @@
         /* ==================== Records Section ==================== */
         .records-section {
             width: 100%;
-            max-width: 640px;
-            margin: 0 auto;
             background: #ffffff;
             border-radius: 16px;
             border: 1px solid #e5e7eb;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
             overflow: hidden;
+        }
+        .records-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        .water-records-section {
+            border-top: 3px solid #0ea5e9;
+        }
+        .elec-records-section {
+            border-top: 3px solid #f59e0b;
+        }
+        .water-records-header {
+            background: #f0f9ff;
+        }
+        .elec-records-header {
+            background: #fffbeb;
+        }
+        .water-records-header .records-title span:first-child {
+            color: #0369a1;
+        }
+        .elec-records-header .records-title span:first-child {
+            color: #b45309;
+        }
+        .btn-add-water {
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+        }
+        .btn-add-water:hover {
+            background: #f0f9ff;
+        }
+        .btn-add-elec {
+            border-color: #f59e0b;
+            color: #f59e0b;
+        }
+        .btn-add-elec:hover {
+            background: #fffbeb;
+        }
+        .water-total {
+            color: #0ea5e9 !important;
+        }
+        .elec-total {
+            color: #f59e0b !important;
+        }
+        .water-meter-row {
+            background: #f0f9ff !important;
+        }
+        .elec-meter-row {
+            background: #fffbeb !important;
+        }
+        .water-meter-row .detail-label {
+            color: #7dd3fc !important;
+        }
+        .elec-meter-row .detail-label {
+            color: #fcd34d !important;
+        }
+        .water-meter-row .detail-value {
+            color: #0369a1 !important;
+        }
+        .elec-meter-row .detail-value {
+            color: #b45309 !important;
         }
         .records-header {
             display: flex;
@@ -1610,6 +1672,7 @@
                 <button class="btn-modal-close" onclick="closeRecordModal()">&times;</button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="record-type">
                 <div class="form-row">
                     <label class="field-label">缴费日期</label>
                     <input type="date" class="date-input" id="record-date">
@@ -1625,53 +1688,32 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <label class="field-label">💧 水费信息</label>
+                    <label class="field-label" id="modal-type-label">💧 水费信息</label>
                 </div>
                 <div class="form-row inline">
                     <div>
-                        <label class="field-label">用水量（吨）</label>
-                        <input type="number" step="any" class="field-input" id="record-water-usage" placeholder="0" oninput="updateRecordModalCalc()">
+                        <label class="field-label" id="modal-reading-unit-start">上期度数</label>
+                        <input type="number" step="any" class="field-input" id="record-reading-start" placeholder="0">
                     </div>
                     <div>
-                        <label class="field-label">单价（元/吨）</label>
-                        <input type="number" step="any" class="field-input" id="record-water-price" placeholder="2.8" value="2.8" oninput="updateRecordModalCalc()">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <label class="field-label">⚡ 电费信息</label>
-                </div>
-                <div class="form-row inline">
-                    <div>
-                        <label class="field-label">上期度数</label>
-                        <input type="number" step="any" class="field-input" id="record-elec-reading-start" placeholder="0">
-                    </div>
-                    <div>
-                        <label class="field-label">本期度数</label>
-                        <input type="number" step="any" class="field-input" id="record-elec-reading-end" placeholder="0">
+                        <label class="field-label" id="modal-reading-unit-end">本期度数</label>
+                        <input type="number" step="any" class="field-input" id="record-reading-end" placeholder="0">
                     </div>
                 </div>
                 <div class="form-row inline">
                     <div>
-                        <label class="field-label">用电量（度）</label>
-                        <input type="number" step="any" class="field-input" id="record-elec-usage" placeholder="0" oninput="updateRecordModalCalc()">
+                        <label class="field-label" id="modal-usage-label">用量</label>
+                        <input type="number" step="any" class="field-input" id="record-usage" placeholder="0" oninput="updateRecordModalCalc()">
                     </div>
                     <div>
-                        <label class="field-label">单价（元/度）</label>
-                        <input type="number" step="any" class="field-input" id="record-elec-price" placeholder="0.55" value="0.55" oninput="updateRecordModalCalc()">
+                        <label class="field-label" id="modal-price-label">单价</label>
+                        <input type="number" step="any" class="field-input" id="record-price" placeholder="0" oninput="updateRecordModalCalc()">
                     </div>
                 </div>
                 <div class="form-row" style="padding:12px;background:#f0f9ff;border-radius:10px;">
-                    <div style="display:flex;justify-content:space-between;font-size:14px;">
-                        <span style="color:#6b7280;">水费合计：</span>
-                        <span style="font-weight:600;color:#0e7490;" id="record-water-cost">¥ 0</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:14px;margin-top:4px;">
-                        <span style="color:#6b7280;">电费合计：</span>
-                        <span style="font-weight:600;color:#c2410c;" id="record-elec-cost">¥ 0</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:16px;margin-top:6px;padding-top:6px;border-top:1px solid #bae6fd;">
-                        <span style="font-weight:600;color:#1f2937;">总费用：</span>
-                        <span style="font-weight:700;color:#3b82f6;" id="record-total-cost">¥ 0</span>
+                    <div style="display:flex;justify-content:space-between;font-size:16px;">
+                        <span style="font-weight:600;color:#1f2937;" id="modal-cost-label">合计：</span>
+                        <span style="font-weight:700;color:#3b82f6;" id="record-cost">¥ 0</span>
                     </div>
                 </div>
                 <div class="form-row">
@@ -1727,15 +1769,19 @@
         const ROOM_COUNTER_KEY = 'utility-bills-room-counter';
         const SELECTED_ROOM_KEY = 'utility-bills-selected-room';
         const SIDEBAR_COLLAPSED_KEY = 'utility-bills-sidebar-collapsed';
-        const RECORDS_PREFIX = 'utility-bills-records';
+        const WATER_RECORDS_PREFIX = 'utility-bills-records-water';
+        const ELEC_RECORDS_PREFIX = 'utility-bills-records-elec';
+        const OLD_RECORDS_PREFIX = 'utility-bills-records'; // 旧版兼容迁移用
         const PAGE_SIZE = 5;
 
         let roomList = [];
         let roomCounter = 0;
         let selectedRoomId = null;
-        let currentRecordsPage = 1;
+        let currentWaterRecordsPage = 1;
+        let currentElecRecordsPage = 1;
         let pendingDeleteRecordId = null;
         let pendingDeleteRoomId = null;
+        let pendingDeleteRecordType = null; // 'water' | 'elec'
 
         // ==================== 存储键辅助函数 ====================
         function getStorageKey(prefix) {
@@ -1744,8 +1790,9 @@
         function getRoomNameKey(roomId) {
             return `utility-bills-${roomId}-name`;
         }
-        function getRecordsKey(roomId) {
-            return `${RECORDS_PREFIX}-${roomId}`;
+        function getRecordsKey(roomId, type) {
+            const prefix = type === 'water' ? WATER_RECORDS_PREFIX : ELEC_RECORDS_PREFIX;
+            return `${prefix}-${roomId}`;
         }
 
         // ==================== 工具函数 ====================
@@ -1793,10 +1840,83 @@
             return ROOM_COLORS[idx % ROOM_COLORS.length];
         }
 
-        // ==================== 记录存储 ====================
-        function loadRecords(roomId) {
+        // ==================== 旧数据迁移 ====================
+        function migrateOldRecords(roomId) {
+            const oldKey = `${OLD_RECORDS_PREFIX}-${roomId}`;
+            const oldData = localStorage.getItem(oldKey);
+            if (!oldData) return;
+
             try {
-                const data = localStorage.getItem(getRecordsKey(roomId));
+                const oldRecords = JSON.parse(oldData);
+                if (!Array.isArray(oldRecords) || oldRecords.length === 0) {
+                    localStorage.removeItem(oldKey);
+                    return;
+                }
+
+                // 检查是否已经迁移过
+                const waterKey = getRecordsKey(roomId, 'water');
+                const elecKey = getRecordsKey(roomId, 'elec');
+                if (localStorage.getItem(waterKey) || localStorage.getItem(elecKey)) {
+                    // 新键已有数据，说明已迁移过，只清除旧键
+                    localStorage.removeItem(oldKey);
+                    return;
+                }
+
+                const waterRecords = [];
+                const elecRecords = [];
+
+                oldRecords.forEach(r => {
+                    // 水费数据
+                    if (r.waterCost != null) {
+                        waterRecords.push({
+                            id: generateRecordId(),
+                            type: 'water',
+                            date: r.date,
+                            meterDateStart: r.meterDateStart,
+                            meterDateEnd: r.meterDateEnd,
+                            usage: r.waterUsage,
+                            unitPrice: r.waterUnitPrice,
+                            cost: r.waterCost,
+                            readingStart: null,
+                            readingEnd: null,
+                            remark: r.remark || '',
+                            savedAt: r.savedAt,
+                            roomId: roomId
+                        });
+                    }
+                    // 电费数据
+                    if (r.elecCost != null) {
+                        elecRecords.push({
+                            id: generateRecordId(),
+                            type: 'elec',
+                            date: r.date,
+                            meterDateStart: r.meterDateStart,
+                            meterDateEnd: r.meterDateEnd,
+                            usage: r.elecUsage,
+                            unitPrice: r.elecUnitPrice,
+                            cost: r.elecCost,
+                            readingStart: r.elecReadingStart,
+                            readingEnd: r.elecReadingEnd,
+                            remark: r.remark || '',
+                            savedAt: r.savedAt,
+                            roomId: roomId
+                        });
+                    }
+                });
+
+                if (waterRecords.length > 0) saveRecords(roomId, 'water', waterRecords);
+                if (elecRecords.length > 0) saveRecords(roomId, 'elec', elecRecords);
+                localStorage.removeItem(oldKey);
+                console.log(`旧记录迁移完成: 水费 ${waterRecords.length} 条, 电费 ${elecRecords.length} 条`);
+            } catch (e) {
+                console.error('旧记录迁移失败:', e);
+            }
+        }
+
+        // ==================== 记录存储 ====================
+        function loadRecords(roomId, type) {
+            try {
+                const data = localStorage.getItem(getRecordsKey(roomId, type));
                 return data ? JSON.parse(data) : [];
             } catch (e) {
                 console.error('加载记录失败:', e);
@@ -1804,12 +1924,12 @@
             }
         }
 
-        function saveRecords(roomId, records) {
-            localStorage.setItem(getRecordsKey(roomId), JSON.stringify(records));
+        function saveRecords(roomId, type, records) {
+            localStorage.setItem(getRecordsKey(roomId, type), JSON.stringify(records));
         }
 
-        function getRecordsFromPage(roomId, page) {
-            const records = loadRecords(roomId);
+        function getRecordsFromPage(roomId, type, page) {
+            const records = loadRecords(roomId, type);
             // 已按时间倒序排列（保存时插入到最前面）
             const start = (page - 1) * PAGE_SIZE;
             const pageRecords = records.slice(start, start + PAGE_SIZE);
@@ -1821,28 +1941,26 @@
         }
 
         // ==================== 记录 UI 渲染 ====================
-        function renderRecords(roomId) {
-            const container = document.getElementById('records-container');
+        function renderWaterRecords(roomId) {
+            const container = document.getElementById('water-records-container');
             if (!container) return;
+            const type = 'water';
+            const { records, total, totalPages } = getRecordsFromPage(roomId, type, currentWaterRecordsPage);
 
-            const { records, total, totalPages } = getRecordsFromPage(roomId, currentRecordsPage);
-
-            // 头部
             let html = `
-            <div class="records-header">
+            <div class="records-header water-records-header">
                 <div class="records-title">
-                    <span>📋 缴费记录</span>
+                    <span>💧 水费缴费记录</span>
                     <span class="records-count">共 ${total} 条</span>
                 </div>
-                <button class="btn-add-record" onclick="openRecordModal('${roomId}')">
+                <button class="btn-add-record btn-add-water" onclick="openRecordModal('${roomId}', null, 'water')">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                    新增记录
+                    新增水费
                 </button>
             </div>`;
 
-            // 列表
             if (records.length === 0) {
                 html += `
                 <div class="records-empty">
@@ -1850,27 +1968,111 @@
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
                     </svg>
-                    <p>暂无缴费记录</p>
-                    <p style="font-size:12px;margin-top:4px;">保存水电费数据后将自动在此生成记录</p>
+                    <p>暂无水费记录</p>
+                    <p style="font-size:12px;margin-top:4px;">在水费 tab 保存数据后将自动生成记录</p>
                 </div>`;
             } else {
                 html += '<div class="records-list">';
                 records.forEach(r => {
-                    const waterCost = r.waterCost || 0;
-                    const elecCost = r.elecCost || 0;
-                    const totalCost = waterCost + elecCost;
-                    // 抄表日期周期 + 度数展示
+                    const cost = r.cost || 0;
                     const start = r.meterDateStart || '?';
                     const end = r.meterDateEnd || '?';
-                    const readingStart = r.elecReadingStart != null ? formatNumber(r.elecReadingStart) : '-';
-                    const readingEnd = r.elecReadingEnd != null ? formatNumber(r.elecReadingEnd) : '-';
+                    const readingStart = r.readingStart != null ? formatNumber(r.readingStart) : '-';
+                    const readingEnd = r.readingEnd != null ? formatNumber(r.readingEnd) : '-';
                     html += `
                     <div class="record-card">
                         <div class="record-card-top">
                             <span class="record-date">${r.date || '-'}</span>
-                            <span class="record-total">${formatMoney(totalCost)}</span>
+                            <span class="record-total water-total">${formatMoney(cost)}</span>
                         </div>
-                        <div class="record-meter-row">
+                        <div class="record-meter-row water-meter-row">
+                            <div class="record-meter-item">
+                                <span class="detail-label">📅 抄表周期</span>
+                                <span class="detail-value">${start} ~ ${end}</span>
+                            </div>
+                            <div class="record-meter-item">
+                                <span class="detail-label">💧 上期度数</span>
+                                <span class="detail-value">${readingStart} 吨</span>
+                            </div>
+                            <div class="record-meter-item">
+                                <span class="detail-label">💧 本期度数</span>
+                                <span class="detail-value">${readingEnd} 吨</span>
+                            </div>
+                        </div>
+                        <div class="record-details">
+                            <div class="record-detail-item">
+                                <span class="detail-label">💧 水费：</span>
+                                <span class="detail-value">${formatMoney(cost)}${r.usage ? ` (${formatNumber(r.usage)}吨 × ${formatMoney(r.unitPrice)})` : ''}</span>
+                            </div>
+                        </div>`;
+                    if (r.remark) {
+                        html += `<div class="record-remark has-remark">${escapeHTML(r.remark)}</div>`;
+                    } else {
+                        html += '<div class="record-remark"></div>';
+                    }
+                    html += `
+                        <div class="record-card-bottom">
+                            <span class="saved-at">保存于 ${r.savedAt ? formatTimestamp(r.savedAt) : '-'}</span>
+                            <div class="record-card-actions">
+                                <button class="btn-record-action edit" onclick="openRecordModal('${roomId}', '${r.id}', 'water')">编辑</button>
+                                <button class="btn-record-action delete" onclick="showDeleteConfirm('${roomId}', '${r.id}', 'water')">删除</button>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            // 分页
+            html += renderPagination(roomId, type, currentWaterRecordsPage, totalPages, 'changeWaterRecordPage');
+            container.innerHTML = html;
+        }
+
+        function renderElecRecords(roomId) {
+            const container = document.getElementById('elec-records-container');
+            if (!container) return;
+            const type = 'elec';
+            const { records, total, totalPages } = getRecordsFromPage(roomId, type, currentElecRecordsPage);
+
+            let html = `
+            <div class="records-header elec-records-header">
+                <div class="records-title">
+                    <span>⚡ 电费缴费记录</span>
+                    <span class="records-count">共 ${total} 条</span>
+                </div>
+                <button class="btn-add-record btn-add-elec" onclick="openRecordModal('${roomId}', null, 'elec')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    新增电费
+                </button>
+            </div>`;
+
+            if (records.length === 0) {
+                html += `
+                <div class="records-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <p>暂无电费记录</p>
+                    <p style="font-size:12px;margin-top:4px;">在电费 tab 保存数据后将自动生成记录</p>
+                </div>`;
+            } else {
+                html += '<div class="records-list">';
+                records.forEach(r => {
+                    const cost = r.cost || 0;
+                    const start = r.meterDateStart || '?';
+                    const end = r.meterDateEnd || '?';
+                    const readingStart = r.readingStart != null ? formatNumber(r.readingStart) : '-';
+                    const readingEnd = r.readingEnd != null ? formatNumber(r.readingEnd) : '-';
+                    html += `
+                    <div class="record-card">
+                        <div class="record-card-top">
+                            <span class="record-date">${r.date || '-'}</span>
+                            <span class="record-total elec-total">${formatMoney(cost)}</span>
+                        </div>
+                        <div class="record-meter-row elec-meter-row">
                             <div class="record-meter-item">
                                 <span class="detail-label">📅 抄表周期</span>
                                 <span class="detail-value">${start} ~ ${end}</span>
@@ -1886,12 +2088,8 @@
                         </div>
                         <div class="record-details">
                             <div class="record-detail-item">
-                                <span class="detail-label">💧 水费：</span>
-                                <span class="detail-value">${formatMoney(waterCost)}${r.waterUsage ? ` (${formatNumber(r.waterUsage)}吨 × ${formatMoney(r.waterUnitPrice)})` : ''}</span>
-                            </div>
-                            <div class="record-detail-item">
                                 <span class="detail-label">⚡ 电费：</span>
-                                <span class="detail-value">${formatMoney(elecCost)}${r.elecUsage ? ` (${formatNumber(r.elecUsage)}度 × ${formatMoney(r.elecUnitPrice)})` : ''}</span>
+                                <span class="detail-value">${formatMoney(cost)}${r.usage ? ` (${formatNumber(r.usage)}度 × ${formatMoney(r.unitPrice)})` : ''}</span>
                             </div>
                         </div>`;
                     if (r.remark) {
@@ -1903,8 +2101,8 @@
                         <div class="record-card-bottom">
                             <span class="saved-at">保存于 ${r.savedAt ? formatTimestamp(r.savedAt) : '-'}</span>
                             <div class="record-card-actions">
-                                <button class="btn-record-action edit" onclick="openRecordModal('${roomId}', '${r.id}')">编辑</button>
-                                <button class="btn-record-action delete" onclick="showDeleteConfirm('${roomId}', '${r.id}')">删除</button>
+                                <button class="btn-record-action edit" onclick="openRecordModal('${roomId}', '${r.id}', 'elec')">编辑</button>
+                                <button class="btn-record-action delete" onclick="showDeleteConfirm('${roomId}', '${r.id}', 'elec')">删除</button>
                             </div>
                         </div>
                     </div>`;
@@ -1913,43 +2111,52 @@
             }
 
             // 分页
-            if (totalPages > 1) {
-                html += '<div class="records-pagination">';
-                html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', ${currentRecordsPage - 1})" ${currentRecordsPage <= 1 ? 'disabled' : ''}>&lt;</button>`;
-
-                const maxVisible = 5;
-                let startPage = Math.max(1, currentRecordsPage - Math.floor(maxVisible / 2));
-                let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-                if (endPage - startPage < maxVisible - 1) {
-                    startPage = Math.max(1, endPage - maxVisible + 1);
-                }
-
-                if (startPage > 1) {
-                    html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', 1)">1</button>`;
-                    if (startPage > 2) html += '<span class="pagination-info">...</span>';
-                }
-
-                for (let p = startPage; p <= endPage; p++) {
-                    html += `<button class="pagination-btn ${p === currentRecordsPage ? 'active' : ''}" onclick="changeRecordPage('${roomId}', ${p})">${p}</button>`;
-                }
-
-                if (endPage < totalPages) {
-                    if (endPage < totalPages - 1) html += '<span class="pagination-info">...</span>';
-                    html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', ${totalPages})">${totalPages}</button>`;
-                }
-
-                html += `<button class="pagination-btn" onclick="changeRecordPage('${roomId}', ${currentRecordsPage + 1})" ${currentRecordsPage >= totalPages ? 'disabled' : ''}>&gt;</button>`;
-                html += '</div>';
-            }
-
+            html += renderPagination(roomId, type, currentElecRecordsPage, totalPages, 'changeElecRecordPage');
             container.innerHTML = html;
         }
 
-        function changeRecordPage(roomId, page) {
-            currentRecordsPage = page;
-            renderRecords(roomId);
-            // 滚动到记录列表区域
-            const section = document.querySelector('.records-section');
+        function renderPagination(roomId, type, currentPage, totalPages, changeFnName) {
+            if (totalPages <= 1) return '';
+            let html = '<div class="records-pagination">';
+            html += `<button class="pagination-btn" onclick="${changeFnName}('${roomId}', ${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>&lt;</button>`;
+
+            const maxVisible = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="${changeFnName}('${roomId}', 1)">1</button>`;
+                if (startPage > 2) html += '<span class="pagination-info">...</span>';
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                html += `<button class="pagination-btn ${p === currentPage ? 'active' : ''}" onclick="${changeFnName}('${roomId}', ${p})">${p}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += '<span class="pagination-info">...</span>';
+                html += `<button class="pagination-btn" onclick="${changeFnName}('${roomId}', ${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button class="pagination-btn" onclick="${changeFnName}('${roomId}', ${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>&gt;</button>`;
+            html += '</div>';
+            return html;
+        }
+
+        function changeWaterRecordPage(roomId, page) {
+            currentWaterRecordsPage = page;
+            renderWaterRecords(roomId);
+            const section = document.querySelector('.water-records-section');
+            if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function changeElecRecordPage(roomId, page) {
+            currentElecRecordsPage = page;
+            renderElecRecords(roomId);
+            const section = document.querySelector('.elec-records-section');
             if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -1963,145 +2170,164 @@
         function generateRecordId() {
             return 'rec_' + crypto.randomUUID();
         }
-        function createRecordFromForm(roomId, onlyTab) {
-            // 从当前房间收集数据，onlyTab 为 'water' 或 'elec' 时只收集对应 tab 的数据
-            let waterUsage = null, waterPrice = null, waterCost = null;
-            let elecUsage = null, elecPrice = null, elecCost = null;
-
-            if (!onlyTab || onlyTab === 'water') {
-                const waterUsageEl = document.getElementById(`${roomId}-water-input3`);
-                const waterPriceEl = document.getElementById(`${roomId}-water-input4`);
-                if (waterUsageEl && waterPriceEl) {
-                    const usage = parseFloat(waterUsageEl.value);
-                    const price = parseFloat(waterPriceEl.value);
-                    if (!isNaN(usage) && !isNaN(price)) {
-                        waterUsage = usage;
-                        waterPrice = price;
-                        waterCost = usage * price;
-                    }
+        // ==================== 从表单创建记录 ====================
+        function createWaterRecordFromForm(roomId) {
+            let usage = null, price = null, cost = null;
+            const usageEl = document.getElementById(`${roomId}-water-input3`);
+            const priceEl = document.getElementById(`${roomId}-water-input4`);
+            if (usageEl && priceEl) {
+                const u = parseFloat(usageEl.value);
+                const p = parseFloat(priceEl.value);
+                if (!isNaN(u) && !isNaN(p)) {
+                    usage = u; price = p; cost = u * p;
                 }
             }
 
-            if (!onlyTab || onlyTab === 'elec') {
-                const elecUsageEl = document.getElementById(`${roomId}-elec-input3`);
-                const elecPriceEl = document.getElementById(`${roomId}-elec-input4`);
-                if (elecUsageEl && elecPriceEl) {
-                    const usage = parseFloat(elecUsageEl.value);
-                    const price = parseFloat(elecPriceEl.value);
-                    if (!isNaN(usage) && !isNaN(price)) {
-                        elecUsage = usage;
-                        elecPrice = price;
-                        elecCost = usage * price;
-                    }
-                }
-            }
-
-            // 拿到记录日期（使用只涉及对应 tab 或两个 tab 中较晚的日期）
+            // 缴费日期
             let recordDate = getToday();
-            const waterDate2 = document.getElementById(`${roomId}-water-date2`);
-            const elecDate2 = document.getElementById(`${roomId}-elec-date2`);
-            if (!onlyTab || onlyTab === 'elec') {
-                if (elecDate2 && elecDate2.value) recordDate = elecDate2.value;
-            }
-            if (!onlyTab || onlyTab === 'water') {
-                if (waterDate2 && waterDate2.value) recordDate = waterDate2.value;
-            }
+            const date2El = document.getElementById(`${roomId}-water-date2`);
+            if (date2El && date2El.value) recordDate = date2El.value;
 
-            // 收集抄表起止日期
-            const waterDate1 = document.getElementById(`${roomId}-water-date1`);
-            const elecDate1 = document.getElementById(`${roomId}-elec-date1`);
-            const startCandidates = [];
-            const endCandidates = [];
-            if (!onlyTab || onlyTab === 'water') {
-                if (waterDate1 && waterDate1.value) startCandidates.push(waterDate1.value);
-                if (waterDate2 && waterDate2.value) endCandidates.push(waterDate2.value);
-            }
-            if (!onlyTab || onlyTab === 'elec') {
-                if (elecDate1 && elecDate1.value) startCandidates.push(elecDate1.value);
-                if (elecDate2 && elecDate2.value) endCandidates.push(elecDate2.value);
-            }
-            const meterDateStart = startCandidates.length ? startCandidates.sort()[0] : null;
-            const meterDateEnd = endCandidates.length ? endCandidates.sort().reverse()[0] : null;
+            // 抄表起止日期
+            const date1El = document.getElementById(`${roomId}-water-date1`);
+            const meterDateStart = date1El && date1El.value ? date1El.value : null;
+            const meterDateEnd = date2El && date2El.value ? date2El.value : null;
 
-            // 收集电费上期/本期度数（用于记录展示）
-            let elecReadingStart = null, elecReadingEnd = null;
-            if (!onlyTab || onlyTab === 'elec') {
-                const elecInput1 = document.getElementById(`${roomId}-elec-input1`);
-                const elecInput2 = document.getElementById(`${roomId}-elec-input2`);
-                elecReadingStart = elecInput1 && elecInput1.value ? parseFloat(elecInput1.value) : null;
-                elecReadingEnd = elecInput2 && elecInput2.value ? parseFloat(elecInput2.value) : null;
-            }
+            // 水表上期/本期度数
+            const input1El = document.getElementById(`${roomId}-water-input1`);
+            const input2El = document.getElementById(`${roomId}-water-input2`);
+            const readingStart = input1El && input1El.value ? parseFloat(input1El.value) : null;
+            const readingEnd = input2El && input2El.value ? parseFloat(input2El.value) : null;
 
             return {
                 id: generateRecordId(),
+                type: 'water',
                 date: recordDate,
                 meterDateStart: meterDateStart,
                 meterDateEnd: meterDateEnd,
-                waterUsage: waterUsage,
-                waterUnitPrice: waterPrice,
-                waterCost: waterCost,
-                elecUsage: elecUsage,
-                elecUnitPrice: elecPrice,
-                elecCost: elecCost,
-                elecReadingStart: elecReadingStart,
-                elecReadingEnd: elecReadingEnd,
+                usage: usage,
+                unitPrice: price,
+                cost: cost,
+                readingStart: readingStart,
+                readingEnd: readingEnd,
                 remark: '',
                 savedAt: new Date().toISOString(),
                 roomId: roomId
             };
         }
 
-        function addRecordToStorage(roomId, record) {
-            const records = loadRecords(roomId);
-            records.unshift(record); // 插入到最前面（倒序）
-            saveRecords(roomId, records);
-            currentRecordsPage = 1;
-            renderRecords(roomId);
+        function createElecRecordFromForm(roomId) {
+            let usage = null, price = null, cost = null;
+            const usageEl = document.getElementById(`${roomId}-elec-input3`);
+            const priceEl = document.getElementById(`${roomId}-elec-input4`);
+            if (usageEl && priceEl) {
+                const u = parseFloat(usageEl.value);
+                const p = parseFloat(priceEl.value);
+                if (!isNaN(u) && !isNaN(p)) {
+                    usage = u; price = p; cost = u * p;
+                }
+            }
+
+            // 缴费日期
+            let recordDate = getToday();
+            const date2El = document.getElementById(`${roomId}-elec-date2`);
+            if (date2El && date2El.value) recordDate = date2El.value;
+
+            // 抄表起止日期
+            const date1El = document.getElementById(`${roomId}-elec-date1`);
+            const meterDateStart = date1El && date1El.value ? date1El.value : null;
+            const meterDateEnd = date2El && date2El.value ? date2El.value : null;
+
+            // 电表上期/本期度数
+            const input1El = document.getElementById(`${roomId}-elec-input1`);
+            const input2El = document.getElementById(`${roomId}-elec-input2`);
+            const readingStart = input1El && input1El.value ? parseFloat(input1El.value) : null;
+            const readingEnd = input2El && input2El.value ? parseFloat(input2El.value) : null;
+
+            return {
+                id: generateRecordId(),
+                type: 'elec',
+                date: recordDate,
+                meterDateStart: meterDateStart,
+                meterDateEnd: meterDateEnd,
+                usage: usage,
+                unitPrice: price,
+                cost: cost,
+                readingStart: readingStart,
+                readingEnd: readingEnd,
+                remark: '',
+                savedAt: new Date().toISOString(),
+                roomId: roomId
+            };
+        }
+
+        function addRecordToStorage(roomId, type, record) {
+            const records = loadRecords(roomId, type);
+            records.unshift(record);
+            saveRecords(roomId, type, records);
+            if (type === 'water') {
+                currentWaterRecordsPage = 1;
+                renderWaterRecords(roomId);
+            } else {
+                currentElecRecordsPage = 1;
+                renderElecRecords(roomId);
+            }
         }
 
         // ==================== 弹窗管理 ====================
-        function openRecordModal(roomId, recordId) {
+        function openRecordModal(roomId, recordId, type) {
             const overlay = document.getElementById('record-modal-overlay');
             const title = document.getElementById('record-modal-title');
+            const isWater = type === 'water';
+
+            // 重置表单
             document.getElementById('record-id').value = recordId || '';
+            document.getElementById('record-type').value = type;
             document.getElementById('record-date').value = getToday();
-            document.getElementById('record-water-usage').value = '';
-            document.getElementById('record-water-price').value = '2.8';
-            document.getElementById('record-elec-usage').value = '';
-            document.getElementById('record-elec-price').value = '0.55';
-            document.getElementById('record-elec-reading-start').value = '';
-            document.getElementById('record-elec-reading-end').value = '';
+            document.getElementById('record-usage').value = '';
+            document.getElementById('record-price').value = isWater ? '2.8' : '0.55';
+            document.getElementById('record-reading-start').value = '';
+            document.getElementById('record-reading-end').value = '';
             document.getElementById('record-remark').value = '';
             document.getElementById('record-meter-start').value = '';
             document.getElementById('record-meter-end').value = '';
-            document.getElementById('record-water-cost').textContent = '¥ 0';
-            document.getElementById('record-elec-cost').textContent = '¥ 0';
-            document.getElementById('record-total-cost').textContent = '¥ 0';
+            document.getElementById('record-cost').textContent = '¥ 0';
+
+            // 更新标签文字
+            const typeLabel = isWater ? '💧 水费信息' : '⚡ 电费信息';
+            const usageLabel = isWater ? '用水量（吨）' : '用电量（度）';
+            const priceLabel = isWater ? '单价（元/吨）' : '单价（元/度）';
+            const readingUnit = isWater ? '上期吨数' : '上期度数';
+            const readingUnitEnd = isWater ? '本期吨数' : '本期度数';
+            const costLabel = isWater ? '水费合计：' : '电费合计：';
+            document.getElementById('modal-type-label').textContent = typeLabel;
+            document.getElementById('modal-usage-label').textContent = usageLabel;
+            document.getElementById('modal-price-label').textContent = priceLabel;
+            document.getElementById('modal-reading-unit-start').textContent = readingUnit;
+            document.getElementById('modal-reading-unit-end').textContent = readingUnitEnd;
+            document.getElementById('modal-cost-label').textContent = costLabel;
 
             if (recordId) {
-                // 编辑模式：填充已有数据
-                title.textContent = '编辑记录';
-                const records = loadRecords(roomId);
+                title.textContent = isWater ? '编辑水费记录' : '编辑电费记录';
+                const records = loadRecords(roomId, type);
                 const record = records.find(r => r.id === recordId);
                 if (record) {
                     document.getElementById('record-date').value = record.date || getToday();
                     document.getElementById('record-meter-start').value = record.meterDateStart || '';
                     document.getElementById('record-meter-end').value = record.meterDateEnd || '';
-                    document.getElementById('record-water-usage').value = record.waterUsage || '';
-                    document.getElementById('record-water-price').value = record.waterUnitPrice != null ? record.waterUnitPrice : '2.8';
-                    document.getElementById('record-elec-usage').value = record.elecUsage || '';
-                    document.getElementById('record-elec-price').value = record.elecUnitPrice != null ? record.elecUnitPrice : '0.55';
-                    document.getElementById('record-elec-reading-start').value = record.elecReadingStart != null ? record.elecReadingStart : '';
-                    document.getElementById('record-elec-reading-end').value = record.elecReadingEnd != null ? record.elecReadingEnd : '';
+                    document.getElementById('record-usage').value = record.usage || '';
+                    document.getElementById('record-price').value = record.unitPrice != null ? record.unitPrice : (isWater ? '2.8' : '0.55');
+                    document.getElementById('record-reading-start').value = record.readingStart != null ? record.readingStart : '';
+                    document.getElementById('record-reading-end').value = record.readingEnd != null ? record.readingEnd : '';
                     document.getElementById('record-remark').value = record.remark || '';
                     updateRecordModalCalc();
                 }
             } else {
-                title.textContent = '新增记录';
+                title.textContent = isWater ? '新增水费记录' : '新增电费记录';
             }
 
-            // 存储当前操作的房间 ID
             overlay.dataset.roomId = roomId;
+            overlay.dataset.recordType = type;
             overlay.classList.add('open');
         }
 
@@ -2110,83 +2336,83 @@
         }
 
         function updateRecordModalCalc() {
-            const wUsage = parseFloat(document.getElementById('record-water-usage').value) || 0;
-            const wPrice = parseFloat(document.getElementById('record-water-price').value) || 0;
-            const eUsage = parseFloat(document.getElementById('record-elec-usage').value) || 0;
-            const ePrice = parseFloat(document.getElementById('record-elec-price').value) || 0;
-
-            const wCost = wUsage * wPrice;
-            const eCost = eUsage * ePrice;
-            const total = wCost + eCost;
-
-            document.getElementById('record-water-cost').textContent = formatMoney(wCost);
-            document.getElementById('record-elec-cost').textContent = formatMoney(eCost);
-            document.getElementById('record-total-cost').textContent = formatMoney(total);
+            const usage = parseFloat(document.getElementById('record-usage').value) || 0;
+            const price = parseFloat(document.getElementById('record-price').value) || 0;
+            const cost = usage * price;
+            document.getElementById('record-cost').textContent = formatMoney(cost);
         }
 
         function saveRecordFromModal() {
             const overlay = document.getElementById('record-modal-overlay');
             const roomId = overlay.dataset.roomId;
-            if (!roomId) return;
+            const type = overlay.dataset.recordType;
+            if (!roomId || !type) return;
 
             const recordId = document.getElementById('record-id').value;
             const date = document.getElementById('record-date').value || getToday();
             const meterDateStart = document.getElementById('record-meter-start').value || null;
             const meterDateEnd = document.getElementById('record-meter-end').value || null;
-            const wUsage = parseFloat(document.getElementById('record-water-usage').value) || null;
-            const wPrice = parseFloat(document.getElementById('record-water-price').value) || null;
-            const eUsage = parseFloat(document.getElementById('record-elec-usage').value) || null;
-            const ePrice = parseFloat(document.getElementById('record-elec-price').value) || null;
-            const eReadingStart = parseFloat(document.getElementById('record-elec-reading-start').value) || null;
-            const eReadingEnd = parseFloat(document.getElementById('record-elec-reading-end').value) || null;
+            const usage = parseFloat(document.getElementById('record-usage').value) || null;
+            const price = parseFloat(document.getElementById('record-price').value) || null;
+            const readingStart = parseFloat(document.getElementById('record-reading-start').value) || null;
+            const readingEnd = parseFloat(document.getElementById('record-reading-end').value) || null;
             const remark = document.getElementById('record-remark').value.trim();
 
             const record = {
                 id: recordId || generateRecordId(),
+                type: type,
                 date: date,
                 meterDateStart: meterDateStart,
                 meterDateEnd: meterDateEnd,
-                waterUsage: wUsage,
-                waterUnitPrice: wPrice,
-                waterCost: wUsage != null && wPrice != null ? wUsage * wPrice : null,
-                elecUsage: eUsage,
-                elecUnitPrice: ePrice,
-                elecCost: eUsage != null && ePrice != null ? eUsage * ePrice : null,
-                elecReadingStart: eReadingStart,
-                elecReadingEnd: eReadingEnd,
+                usage: usage,
+                unitPrice: price,
+                cost: usage != null && price != null ? usage * price : null,
+                readingStart: readingStart,
+                readingEnd: readingEnd,
                 remark: remark,
                 savedAt: new Date().toISOString(),
                 roomId: roomId
             };
 
-            const records = loadRecords(roomId);
+            const records = loadRecords(roomId, type);
 
             if (recordId) {
-                // 编辑模式
                 const idx = records.findIndex(r => r.id === recordId);
                 if (idx !== -1) {
-                    record.savedAt = records[idx].savedAt; // 保留原始保存时间
+                    record.savedAt = records[idx].savedAt;
                     records[idx] = record;
                 }
             } else {
-                // 新增
                 records.unshift(record);
             }
 
-            saveRecords(roomId, records);
-            currentRecordsPage = 1;
+            saveRecords(roomId, type, records);
+            if (type === 'water') {
+                currentWaterRecordsPage = 1;
+            } else {
+                currentElecRecordsPage = 1;
+            }
             closeRecordModal();
-            renderRecords(roomId);
 
-            // 滚动到记录列表
-            const section = document.querySelector('.records-section');
-            if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (type === 'water') {
+                renderWaterRecords(roomId);
+                const section = document.querySelector('.water-records-section');
+                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                renderElecRecords(roomId);
+                const section = document.querySelector('.elec-records-section');
+                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         // ==================== 删除确认 ====================
-        function showDeleteConfirm(roomId, recordId) {
+        function showDeleteConfirm(roomId, recordId, type) {
             pendingDeleteRoomId = roomId;
             pendingDeleteRecordId = recordId;
+            pendingDeleteRecordType = type;
+            document.getElementById('confirm-text').textContent =
+                type === 'water' ? '确定要删除这条水费记录吗？此操作不可撤销。'
+                                 : '确定要删除这条电费记录吗？此操作不可撤销。';
             document.getElementById('confirm-overlay').classList.add('open');
         }
 
@@ -2194,27 +2420,36 @@
             document.getElementById('confirm-overlay').classList.remove('open');
             pendingDeleteRecordId = null;
             pendingDeleteRoomId = null;
+            pendingDeleteRecordType = null;
         }
 
         function confirmDeleteRecord() {
-            if (!pendingDeleteRecordId || !pendingDeleteRoomId) return;
+            if (!pendingDeleteRecordId || !pendingDeleteRoomId || !pendingDeleteRecordType) return;
 
-            // 先保存 roomId，因为 closeConfirmDialog() 会将其置为 null
             const roomId = pendingDeleteRoomId;
             const recordId = pendingDeleteRecordId;
+            const type = pendingDeleteRecordType;
 
-            const records = loadRecords(roomId);
+            const records = loadRecords(roomId, type);
             const updated = records.filter(r => r.id !== recordId);
-            saveRecords(roomId, updated);
+            saveRecords(roomId, type, updated);
 
-            // 如果当前页没有记录了，回退一页
-            const { totalPages } = getRecordsFromPage(roomId, currentRecordsPage);
-            if (currentRecordsPage > totalPages) {
-                currentRecordsPage = Math.max(1, totalPages);
+            const currentPage = type === 'water' ? currentWaterRecordsPage : currentElecRecordsPage;
+            const { totalPages } = getRecordsFromPage(roomId, type, currentPage);
+            if (currentPage > totalPages) {
+                if (type === 'water') {
+                    currentWaterRecordsPage = Math.max(1, totalPages);
+                } else {
+                    currentElecRecordsPage = Math.max(1, totalPages);
+                }
             }
 
             closeConfirmDialog();
-            renderRecords(roomId);
+            if (type === 'water') {
+                renderWaterRecords(roomId);
+            } else {
+                renderElecRecords(roomId);
+            }
         }
 
         // 点击遮罩关闭弹窗（脚本在 body 末尾，DOM 已就绪，直接执行）
@@ -2374,9 +2609,13 @@
             if (!selectedRoomId || !roomList.includes(selectedRoomId)) {
                 selectedRoomId = roomList[0];
             }
-            currentRecordsPage = 1;
+            currentWaterRecordsPage = 1;
+            currentElecRecordsPage = 1;
             mainEl.innerHTML = createRoomPanel(selectedRoomId) +
-                '<div class="records-section" id="records-container"></div>';
+                '<div class="records-wrapper">' +
+                    '<div class="records-section water-records-section" id="water-records-container"></div>' +
+                    '<div class="records-section elec-records-section" id="elec-records-container" style="display:none"></div>' +
+                '</div>';
             initRoomPanel(selectedRoomId);
         }
 
@@ -2390,7 +2629,8 @@
             if (roomId === selectedRoomId) return;
             selectedRoomId = roomId;
             saveSelectedRoom();
-            currentRecordsPage = 1;
+            currentWaterRecordsPage = 1;
+            currentElecRecordsPage = 1;
 
             document.querySelectorAll('.room-list-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.room === roomId);
@@ -2432,7 +2672,9 @@
                 localStorage.removeItem(getStorageKey(`${roomId}-${tab}`));
             });
             localStorage.removeItem(getRoomNameKey(roomId));
-            localStorage.removeItem(getRecordsKey(roomId));
+            localStorage.removeItem(getRecordsKey(roomId, 'water'));
+            localStorage.removeItem(getRecordsKey(roomId, 'elec'));
+            localStorage.removeItem(`${OLD_RECORDS_PREFIX}-${roomId}`); // 清除旧版数据
 
             roomList = roomList.filter(id => id !== roomId);
             saveRoomList();
@@ -2461,6 +2703,17 @@
             const content = document.getElementById(`${roomId}-${tabName}`);
             if (tabBtn) tabBtn.classList.add('active');
             if (content) content.classList.add('active');
+
+            // 根据当前 tab 切换缴费记录列表的显示
+            const waterContainer = document.getElementById('water-records-container');
+            const elecContainer = document.getElementById('elec-records-container');
+            if (tabName === 'water') {
+                if (waterContainer) waterContainer.style.display = '';
+                if (elecContainer) elecContainer.style.display = 'none';
+            } else {
+                if (waterContainer) waterContainer.style.display = 'none';
+                if (elecContainer) elecContainer.style.display = '';
+            }
         }
 
         // ==================== 计算逻辑 ====================
@@ -2572,14 +2825,21 @@
             saveToStorage(prefix);
             updateSaveTimeDisplay(prefix);
 
-            // 提取 roomId 和 tab 类型，只收集当前 tab 的数据
+            // 提取 roomId 和 tab 类型
             const parts = prefix.split('-');
             const tab = parts[parts.length - 1]; // 'water' 或 'elec'
             const roomId = parts.slice(0, -1).join('-');
-            const record = createRecordFromForm(roomId, tab);
-            // 只在有数据时才添加记录
-            if (record.waterCost != null || record.elecCost != null) {
-                addRecordToStorage(roomId, record);
+
+            if (tab === 'water') {
+                const record = createWaterRecordFromForm(roomId);
+                if (record.cost != null) {
+                    addRecordToStorage(roomId, 'water', record);
+                }
+            } else if (tab === 'elec') {
+                const record = createElecRecordFromForm(roomId);
+                if (record.cost != null) {
+                    addRecordToStorage(roomId, 'elec', record);
+                }
             }
         }
 
@@ -2667,9 +2927,13 @@
             });
 
             // 也清除记录
-            localStorage.removeItem(getRecordsKey(roomId));
-            currentRecordsPage = 1;
-            renderRecords(roomId);
+            localStorage.removeItem(getRecordsKey(roomId, 'water'));
+            localStorage.removeItem(getRecordsKey(roomId, 'elec'));
+            localStorage.removeItem(`${OLD_RECORDS_PREFIX}-${roomId}`);
+            currentWaterRecordsPage = 1;
+            currentElecRecordsPage = 1;
+            renderWaterRecords(roomId);
+            renderElecRecords(roomId);
         }
 
         function resetForm(prefix) {
@@ -2787,8 +3051,10 @@
                 updateResult(prefix);
             });
 
-            // 渲染记录列表
-            renderRecords(roomId);
+            // 渲染记录列表（水费和电费各自独立）
+            migrateOldRecords(roomId);
+            renderWaterRecords(roomId);
+            renderElecRecords(roomId);
 
             return restored;
         }
